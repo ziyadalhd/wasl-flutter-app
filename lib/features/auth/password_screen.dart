@@ -36,7 +36,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'You must agree to the Terms & Conditions to register.',
+            'لابد أن توافق على الشروط والأحكام للتسجيل',
             textAlign: TextAlign.right,
           ),
           backgroundColor: Colors.red,
@@ -53,7 +53,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
     if (value == null || value.isEmpty) return 'مطلوب';
     // 1.f: Complexity
     if (value.length < 8) {
-      return 'Password must be at least 8 characters long.';
+      return '8 خانات';
     }
     return null;
   }
@@ -62,7 +62,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
     if (value == null || value.isEmpty) return 'مطلوب';
     if (value != _passwordController.text) {
       // 1.e
-      return 'Passwords do not match.';
+      return 'غير متطابق';
     }
     return null;
   }
