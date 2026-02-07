@@ -135,7 +135,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 // I'll make it go to '/' which is Splash -> Onboarding -> Login (cycle).
                 // Or if there was a home route.
                 // For now, let's navigate to "/login" to Simulate "End of Flow".
-                onPressed: () => context.go('/login'),
+                onPressed: () => context.go('/role'),
               ),
               const SizedBox(height: 24),
             ],

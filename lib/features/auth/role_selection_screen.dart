@@ -62,7 +62,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 icon: Icons.school_outlined,
                 title: 'طالب',
                 description: 'ابحث عن خدمات النقل والسكن\nواحجز بسهولة وأمان',
-                onTap: () => context.go('/welcome'),
+                onTap: () => context.go('/student/home'),
                 color: const Color(0xFFE0F2F1), // Very light teal
                 contentColor: AppTheme.primaryColor,
               ),
@@ -74,7 +74,9 @@ class RoleSelectionScreen extends StatelessWidget {
                 icon: Icons.car_rental,
                 title: 'مقدم خدمة',
                 description: 'قدّم خدمات النقل أو السكن\nوأدر حجوزاتك بكفاءة',
-                onTap: () => context.go('/welcome'),
+                onTap: () {
+                  // TODO: Navigate to Service Provider Home
+                },
                 color: Colors.white,
                 contentColor: AppTheme.textColor,
                 isOutlined: true,

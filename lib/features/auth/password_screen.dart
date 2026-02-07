@@ -46,7 +46,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
     }
 
     // Success
-    context.push('/role');
+    context.push('/welcome');
   }
 
   String? _validatePassword(String? value) {

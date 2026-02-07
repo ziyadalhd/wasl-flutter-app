@@ -6,6 +6,7 @@ import 'package:wasl/features/auth/role_selection_screen.dart';
 import 'package:wasl/features/auth/signup_screen.dart';
 import 'package:wasl/features/auth/password_screen.dart';
 import 'package:wasl/features/welcome/welcome_screen.dart';
+import 'package:wasl/features/student/home/presentation/pages/student_home_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -34,6 +35,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/welcome',
       builder: (context, state) => const WelcomeScreen(),
+    ),
+    GoRoute(
+      path: '/student/home',
+      builder: (context, state) => const StudentHomeScreen(),
     ),
   ],
 );

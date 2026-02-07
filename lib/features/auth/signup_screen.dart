@@ -386,7 +386,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedCity,
+                  initialValue: _selectedCity,
                   items: _saudiCities.map((city) {
                     return DropdownMenuItem(value: city, child: Text(city));
                   }).toList(),

@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     // Success (Mock)
-    context.go('/welcome');
+    context.go('/student/home');
   }
 
   String? _validateEmail(String? value) {
