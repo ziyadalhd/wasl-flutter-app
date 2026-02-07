@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wasl/core/theme/app_theme.dart';
+import 'package:wasl/features/service_provider/profile/presentation/screens/service_provider_profile_screen.dart';
 
 class ServiceProviderAppBar extends StatelessWidget implements PreferredSizeWidget {
   const ServiceProviderAppBar({super.key});
@@ -16,47 +17,59 @@ class ServiceProviderAppBar extends StatelessWidget implements PreferredSizeWidg
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
              // Profile Info (Start - Right in RTL)
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ServiceProviderProfileScreen(),
                   ),
-                  child: CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Colors.white,
-                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'), // Different placeholder
-                    onBackgroundImageError: (_, __) {},
+                );
+              },
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+                    ),
+                    child: CircleAvatar(
+                      radius: 24,
+                      backgroundColor: Colors.white,
+                      backgroundImage:
+                          NetworkImage('https://i.pravatar.cc/150?img=12'), // Different placeholder
+                      onBackgroundImageError: (_, __) {},
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'فارس المقبل',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Tajawal',
-                        height: 1.2,
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'فارس المقبل',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Tajawal',
+                          height: 1.2,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'مقدم خدمة', // Service Provider
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 14,
-                        fontFamily: 'Tajawal',
+                      Text(
+                        'مقدم خدمة', // Service Provider
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 14,
+                          fontFamily: 'Tajawal',
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
 
             // Notification Icon (End - Left in RTL)
