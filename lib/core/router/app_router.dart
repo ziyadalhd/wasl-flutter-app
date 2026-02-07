@@ -7,6 +7,7 @@ import 'package:wasl/features/auth/signup_screen.dart';
 import 'package:wasl/features/auth/password_screen.dart';
 import 'package:wasl/features/welcome/welcome_screen.dart';
 import 'package:wasl/features/student/home/presentation/pages/student_home_screen.dart';
+import 'package:wasl/features/service_provider/home/presentation/pages/service_provider_home_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -39,6 +40,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/student/home',
       builder: (context, state) => const StudentHomeScreen(),
+    ),
+    GoRoute(
+      path: '/service_provider/home',
+      builder: (context, state) => const ServiceProviderHomeScreen(),
     ),
   ],
 );

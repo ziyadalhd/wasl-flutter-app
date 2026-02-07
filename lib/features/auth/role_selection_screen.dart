@@ -75,7 +75,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 title: 'مقدم خدمة',
                 description: 'قدّم خدمات النقل أو السكن\nوأدر حجوزاتك بكفاءة',
                 onTap: () {
-                  // TODO: Navigate to Service Provider Home
+                  context.go('/service_provider/home');
                 },
                 color: Colors.white,
                 contentColor: AppTheme.textColor,

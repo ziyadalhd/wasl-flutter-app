@@ -1,0 +1,88 @@
+import 'package:flutter/material.dart';
+import 'package:wasl/core/theme/app_theme.dart';
+
+class ServiceProviderAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const ServiceProviderAppBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: AppTheme.primaryColor,
+      toolbarHeight: 80,
+      automaticallyImplyLeading: false,
+      title: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+             // Profile Info (Start - Right in RTL)
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+                  ),
+                  child: CircleAvatar(
+                    radius: 24,
+                    backgroundColor: Colors.white,
+                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=12'), // Different placeholder
+                    onBackgroundImageError: (_, __) {},
+                  ),
+                ),
+                const SizedBox(width: 12),
+                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'فارس المقبل',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Tajawal',
+                        height: 1.2,
+                      ),
+                    ),
+                    Text(
+                      'مقدم خدمة', // Service Provider
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontSize: 14,
+                        fontFamily: 'Tajawal',
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            // Notification Icon (End - Left in RTL)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: Colors.white,
+                  size: 26,
+                ),
+                onPressed: () {
+                  // TODO: Handle notification tap
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(80);
+}
