@@ -15,6 +15,7 @@ import 'package:wasl/features/student/profile/presentation/screens/support_scree
 import 'package:wasl/features/student/profile/presentation/screens/about_us_screen.dart';
 import 'package:wasl/features/student/profile/presentation/screens/support_chat_screen.dart';
 import 'package:wasl/features/student/profile/presentation/screens/terms_conditions_screen.dart';
+import 'package:wasl/features/notifications/presentation/screens/notifications_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -81,6 +82,10 @@ final appRouter = GoRouter(
           builder: (context, state) => const TermsConditionsScreen(),
         ),
       ],
+    ),
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationsScreen(),
     ),
   ],
 );

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/service_provider/profile/presentation/screens/service_provider_profile_screen.dart';
 
-class ServiceProviderAppBar extends StatelessWidget implements PreferredSizeWidget {
+class ServiceProviderAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const ServiceProviderAppBar({super.key});
 
   @override
@@ -16,7 +18,7 @@ class ServiceProviderAppBar extends StatelessWidget implements PreferredSizeWidg
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-             // Profile Info (Start - Right in RTL)
+            // Profile Info (Start - Right in RTL)
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -33,13 +35,16 @@ class ServiceProviderAppBar extends StatelessWidget implements PreferredSizeWidg
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+                        color: Colors.white.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
                     ),
                     child: CircleAvatar(
                       radius: 24,
                       backgroundColor: Colors.white,
-                      backgroundImage:
-                          NetworkImage('https://i.pravatar.cc/150?img=12'), // Different placeholder
+                      backgroundImage: NetworkImage(
+                        'https://i.pravatar.cc/150?img=12',
+                      ), // Different placeholder
                       onBackgroundImageError: (_, __) {},
                     ),
                   ),
@@ -86,7 +91,7 @@ class ServiceProviderAppBar extends StatelessWidget implements PreferredSizeWidg
                   size: 26,
                 ),
                 onPressed: () {
-                  // TODO: Handle notification tap
+                  context.push('/notifications');
                 },
               ),
             ),

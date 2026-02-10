@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/student/profile/presentation/screens/student_profile_screen.dart';
 
@@ -12,11 +13,14 @@ class StudentAppBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: 80,
       automaticallyImplyLeading: false, // Remove back button if any
       title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0), // increased padding
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12.0,
+          vertical: 12.0,
+        ), // increased padding
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-             // Profile Info (Start - Right in RTL)
+            // Profile Info (Start - Right in RTL)
             GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -33,13 +37,16 @@ class StudentAppBar extends StatelessWidget implements PreferredSizeWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.5), width: 1.5),
+                        color: Colors.white.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
                     ),
                     child: CircleAvatar(
                       radius: 24,
                       backgroundColor: Colors.white,
-                      backgroundImage:
-                          NetworkImage('https://i.pravatar.cc/150?img=11'), // Placeholder
+                      backgroundImage: NetworkImage(
+                        'https://i.pravatar.cc/150?img=11',
+                      ), // Placeholder
                       onBackgroundImageError: (_, __) {},
                     ),
                   ),
@@ -75,7 +82,9 @@ class StudentAppBar extends StatelessWidget implements PreferredSizeWidget {
             // Notification Icon (End - Left in RTL)
             Container(
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15), // Slightly more transparent
+                color: Colors.white.withValues(
+                  alpha: 0.15,
+                ), // Slightly more transparent
                 borderRadius: BorderRadius.circular(14), // increased radius
                 border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
@@ -86,7 +95,7 @@ class StudentAppBar extends StatelessWidget implements PreferredSizeWidget {
                   size: 26,
                 ),
                 onPressed: () {
-                  // TODO: Handle notification tap
+                  context.push('/notifications');
                 },
               ),
             ),
