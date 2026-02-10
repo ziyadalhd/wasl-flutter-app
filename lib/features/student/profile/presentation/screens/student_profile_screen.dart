@@ -1,10 +1,17 @@
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 
-class StudentProfileScreen extends StatelessWidget {
+class StudentProfileScreen extends StatefulWidget {
   const StudentProfileScreen({super.key});
+
+  @override
+  State<StudentProfileScreen> createState() => _StudentProfileScreenState();
+}
+
+class _StudentProfileScreenState extends State<StudentProfileScreen> {
+  // Mock state for verification. In a real app, this would come from a provider/bloc.
+  bool _isVerified = false;
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +23,10 @@ class StudentProfileScreen extends StatelessWidget {
           backgroundColor: const Color(0xFFFDFBF7),
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: AppTheme.textColor),
+            icon: const Icon(
+              Icons.arrow_back_ios_new,
+              color: AppTheme.textColor,
+            ),
             onPressed: () => context.pop(),
           ),
           title: const Text(
@@ -36,33 +46,39 @@ class StudentProfileScreen extends StatelessWidget {
               const SizedBox(height: 16),
               // 1. Header Section (Top Card)
               _buildProfileHeader(),
-              
+
               const SizedBox(height: 24),
-              
+
               // 2. Main Menu List
               _buildMenuItem(
                 icon: Icons.person_outline_rounded,
                 title: 'تعديل الملف الشخصي',
-                onTap: () {},
+                onTap: () {
+                  context.push('/student/profile/edit');
+                },
               ),
               _buildMenuItem(
                 icon: Icons.notifications_outlined,
                 title: 'إدارة الإشعارات',
-                onTap: () {},
+                onTap: () {
+                  context.push('/student/profile/notifications');
+                },
               ),
               _buildMenuItem(
                 icon: Icons.help_outline_rounded,
                 title: 'الدعم والمساعدة',
-                onTap: () {},
+                onTap: () {
+                  context.push('/student/profile/support');
+                },
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Switch to Service Provider
               _buildSwitchRoleButton(context),
-              
+
               const SizedBox(height: 8),
-              
+
               _buildMenuItem(
                 icon: Icons.logout_rounded,
                 title: 'تسجيل الخروج',
@@ -70,13 +86,13 @@ class StudentProfileScreen extends StatelessWidget {
                 iconColor: Colors.red,
                 showArrow: false,
                 onTap: () {
-                   context.go('/login');
+                  context.go('/login');
                 },
               ),
 
               const SizedBox(height: 8),
 
-               _buildMenuItem(
+              _buildMenuItem(
                 icon: Icons.delete_outline_rounded,
                 title: 'حذف الحساب',
                 textColor: Colors.grey,
@@ -86,7 +102,7 @@ class StudentProfileScreen extends StatelessWidget {
                   // Delete Logic
                 },
               ),
-              
+
               const SizedBox(height: 40),
             ],
           ),
@@ -126,14 +142,19 @@ class StudentProfileScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
                   ),
                   child: const CircleAvatar(
                     radius: 35,
-                    backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
+                    backgroundImage: NetworkImage(
+                      'https://i.pravatar.cc/150?img=11',
+                    ),
                   ),
                 ),
-                
+
                 const SizedBox(width: 16),
 
                 // Name and Info (Left of Avatar in RTL)
@@ -153,26 +174,86 @@ class StudentProfileScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Icon(Icons.verified, color: Colors.blueAccent, size: 20),
+                          if (_isVerified)
+                            const Icon(
+                              Icons.verified,
+                              color: Colors.blueAccent,
+                              size: 20,
+                            ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'طالب',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontFamily: 'Tajawal',
-                            fontWeight: FontWeight.w500,
+                      // Verification Status / Action
+                      if (!_isVerified)
+                        InkWell(
+                          onTap: () async {
+                            // Build context push returns a future that completes when the pushed route is popped
+                            final result = await context.push(
+                              '/student/complete-profile',
+                            );
+                            if (result == true) {
+                              setState(() {
+                                _isVerified = true;
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.orangeAccent.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.info_outline_rounded,
+                                  color: Colors.orangeAccent,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 6),
+                                const Text(
+                                  'وثق حسابك واكمل بياناتك',
+                                  style: TextStyle(
+                                    color: Colors.orangeAccent,
+                                    fontSize: 12,
+                                    fontFamily: 'Tajawal',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            'طالب',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontFamily: 'Tajawal',
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
-                      ),
+
                       const SizedBox(height: 8),
                       Text(
                         'student@university.edu',
@@ -235,10 +316,19 @@ class StudentProfileScreen extends StatelessWidget {
             ),
           ),
           trailing: showArrow
-              ? const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey)
+              ? const Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: Colors.grey,
+                )
               : null,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 4,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       ),
     );
@@ -267,8 +357,8 @@ class StudentProfileScreen extends StatelessWidget {
           color: Colors.transparent,
           child: InkWell(
             onTap: () {
-               // Navigation to Service Provider Home
-               context.go('/service_provider/home');
+              // Navigation to Service Provider Home
+              context.go('/service_provider/home');
             },
             borderRadius: BorderRadius.circular(16),
             child: Padding(
@@ -281,7 +371,11 @@ class StudentProfileScreen extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.swap_horiz_rounded, color: Colors.white, size: 24),
+                    child: const Icon(
+                      Icons.swap_horiz_rounded,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   const Expanded(
@@ -295,7 +389,11 @@ class StudentProfileScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+                  const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ],
               ),
             ),
@@ -321,12 +419,12 @@ class StudentProfileScreen extends StatelessWidget {
         currentIndex: 2, // Home is active
         onTap: (index) {
           if (index == 2) {
-             // Already in Home flow context, just pop to go back to Home Screen
-             if (context.canPop()) {
-               context.pop();
-             } else {
-               context.go('/student/home');
-             }
+            // Already in Home flow context, just pop to go back to Home Screen
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/student/home');
+            }
           }
           // Handle other nav items if needed
         },

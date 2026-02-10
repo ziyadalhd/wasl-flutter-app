@@ -8,6 +8,13 @@ import 'package:wasl/features/auth/password_screen.dart';
 import 'package:wasl/features/welcome/welcome_screen.dart';
 import 'package:wasl/features/student/home/presentation/pages/student_home_screen.dart';
 import 'package:wasl/features/service_provider/home/presentation/pages/service_provider_home_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/complete_profile_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/manage_notifications_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/support_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/about_us_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/support_chat_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/terms_conditions_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -44,6 +51,36 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/service_provider/home',
       builder: (context, state) => const ServiceProviderHomeScreen(),
+    ),
+    GoRoute(
+      path: '/student/complete-profile',
+      builder: (context, state) => const CompleteProfileScreen(),
+    ),
+    GoRoute(
+      path: '/student/profile/edit',
+      builder: (context, state) => const EditProfileScreen(),
+    ),
+    GoRoute(
+      path: '/student/profile/notifications',
+      builder: (context, state) => const ManageNotificationsScreen(),
+    ),
+    GoRoute(
+      path: '/student/profile/support',
+      builder: (context, state) => const SupportScreen(),
+      routes: [
+        GoRoute(
+          path: 'chat',
+          builder: (context, state) => const SupportChatScreen(),
+        ),
+        GoRoute(
+          path: 'about',
+          builder: (context, state) => const AboutUsScreen(),
+        ),
+        GoRoute(
+          path: 'terms',
+          builder: (context, state) => const TermsConditionsScreen(),
+        ),
+      ],
     ),
   ],
 );

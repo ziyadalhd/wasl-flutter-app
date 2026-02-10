@@ -5,28 +5,34 @@ class CustomTextField extends StatelessWidget {
   final String? label;
   final String hint;
   final IconData? prefixIcon;
+  final Widget? suffixIcon;
   final bool obscureText;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final bool readOnly;
+  final CrossAxisAlignment? labelAlignment;
 
   const CustomTextField({
     super.key,
     this.label,
     required this.hint,
     this.prefixIcon,
+    this.suffixIcon,
     this.obscureText = false,
     this.controller,
     this.keyboardType,
     this.validator,
     this.onChanged,
+    this.readOnly = false,
+    this.labelAlignment,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: labelAlignment ?? CrossAxisAlignment.end,
       children: [
         if (label != null) ...[
           Text(
@@ -46,6 +52,7 @@ class CustomTextField extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.w500),
           validator: validator,
           onChanged: onChanged,
+          readOnly: readOnly,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           textDirection: TextDirection.rtl,
           decoration: InputDecoration(
@@ -54,6 +61,7 @@ class CustomTextField extends StatelessWidget {
             prefixIcon: prefixIcon != null
                 ? Icon(prefixIcon, color: AppTheme.primaryColor)
                 : null,
+            suffixIcon: suffixIcon,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
