@@ -1,0 +1,302 @@
+openapi: 3.0.3
+info:
+  title: Wasl University Service Platform API
+  description: Backend API for the Wasl university service platform.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local dev server
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with credentials
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /api/me:
+    get:
+      tags: [Me]
+      summary: Get current user profile
+      responses:
+        '200':
+          description: User profile with polymorphic profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+
+  /api/me/mode:
+    put:
+      tags: [Me]
+      summary: Switch user mode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SwitchModeRequest'
+      responses:
+        '200':
+          description: Mode switched successfully
+
+  /api/home/student:
+    get:
+      tags: [Home]
+      summary: Get student home feed
+      description: Requires STUDENT role.
+      responses:
+        '200':
+          description: Student home feed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentHomeResponseDTO'
+
+  /api/admin/providers/{id}/verify:
+    post:
+      tags: [Admin]
+      summary: Verify a provider
+      description: Requires ADMIN role.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Provider verified
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password, fullName, mode, rolesWanted]
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        password:
+          type: string
+          minLength: 6
+        fullName:
+          type: string
+        mode:
+          type: string
+          enum: [STUDENT, PROVIDER]
+        rolesWanted:
+          type: array
+          items:
+            type: string
+            enum: [STUDENT, PROVIDER, ADMIN]
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    SwitchModeRequest:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          type: string
+          enum: [STUDENT, PROVIDER]
+
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        phone:
+          type: string
+        fullName:
+          type: string
+        selectedMode:
+          type: string
+        status:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+
+    StudentProfileDTO:
+      type: object
+      properties:
+        universityId:
+          type: string
+        collegeName:
+          type: string
+
+    ProviderProfileDTO:
+      type: object
+      properties:
+        bio:
+          type: string
+        verificationStatus:
+          type: string
+          enum: [PENDING, APPROVED, REJECTED]
+        providerType:
+          type: string
+          enum: [ACCOMMODATION, TRANSPORTATION, BOTH]
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderDocumentDTO'
+
+    ProviderDocumentDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+
+    MeResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserDTO'
+        mode:
+          type: string
+          enum: [STUDENT, PROVIDER]
+        profile:
+          oneOf:
+            - $ref: '#/components/schemas/StudentProfileDTO'
+            - $ref: '#/components/schemas/ProviderProfileDTO'
+          discriminator:
+            propertyName: mode
+            mapping:
+              STUDENT: '#/components/schemas/StudentProfileDTO'
+              PROVIDER: '#/components/schemas/ProviderProfileDTO'
+
+    ApartmentListingDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        city:
+          type: string
+        price:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+
+    TransportSubscriptionDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+
+    ProfileCompletionDTO:
+      type: object
+      properties:
+        percentage:
+          type: integer
+        missingFields:
+          type: array
+          items:
+            type: string
+
+    StudentHomeResponseDTO:
+      type: object
+      properties:
+        listings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApartmentListingDTO'
+        subscriptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransportSubscriptionDTO'
+        profileCompletion:
+          $ref: '#/components/schemas/ProfileCompletionDTO'
+
+    ApiErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
