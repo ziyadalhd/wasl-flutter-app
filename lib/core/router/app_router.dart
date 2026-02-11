@@ -16,6 +16,7 @@ import 'package:wasl/features/student/profile/presentation/screens/about_us_scre
 import 'package:wasl/features/student/profile/presentation/screens/support_chat_screen.dart';
 import 'package:wasl/features/student/profile/presentation/screens/terms_conditions_screen.dart';
 import 'package:wasl/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:wasl/features/auth/delete_account_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -86,6 +87,13 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/notifications',
       builder: (context, state) => const NotificationsScreen(),
+    ),
+    GoRoute(
+      path: '/delete-account',
+      builder: (context, state) {
+        final role = state.uri.queryParameters['role'] ?? 'student';
+        return DeleteAccountScreen(role: role);
+      },
     ),
   ],
 );

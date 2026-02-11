@@ -99,7 +99,12 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                 iconColor: Colors.grey,
                 showArrow: false,
                 onTap: () {
-                  // Delete Logic
+                  context.push(
+                    Uri(
+                      path: '/delete-account',
+                      queryParameters: {'role': 'student'},
+                    ).toString(),
+                  );
                 },
               ),
 

@@ -4,12 +4,16 @@ class PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final bool isLoading;
+  final Color? backgroundColor;
+  final Color? textColor;
 
   const PrimaryButton({
     super.key,
     required this.text,
     this.onPressed,
     this.isLoading = false,
+    this.backgroundColor,
+    this.textColor,
   });
 
   @override
@@ -20,6 +24,8 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor,
+          foregroundColor: textColor,
           elevation: 2,
           shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.3),
         ),
@@ -34,9 +40,10 @@ class PrimaryButton extends StatelessWidget {
               )
             : Text(
                 text,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: textColor, // Ensure text color is applied
                 ),
               ),
       ),

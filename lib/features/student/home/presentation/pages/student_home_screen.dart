@@ -43,31 +43,19 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     horizontal: 4,
                     vertical: 8,
                   ),
-                  children: [
-                    ListingCard(
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-                      title: 'استديو حديث',
-                      subtitle: '1500 ريال/شهر',
-                      tagText: 'حي الجامعة',
-                      onTap: () {},
-                    ),
-                    ListingCard(
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-                      title: 'استديو حديث',
-                      subtitle: '1500 ريال/شهر',
-                      tagText: 'حي الجامعة',
-                      onTap: () {},
-                    ),
-                    AddServiceCard(
-                      label: 'إضافة خدمة سكن',
-                      onTap: () {
-                        // TODO: Handle Add Housing Service
-                      },
-                    ),
-                    const SizedBox(width: 20),
-                  ],
+                  children: List.generate(5, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: ListingCard(
+                        imageUrl:
+                            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+                        title: 'استديو حديث ${index + 1}',
+                        subtitle: '1500 ريال/شهر',
+                        tagText: 'حي الجامعة',
+                        onTap: () {},
+                      ),
+                    );
+                  }),
                 ),
               ),
 
@@ -87,29 +75,18 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     horizontal: 4,
                     vertical: 8,
                   ),
-                  children: [
-                    ListingCard(
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-                      title: 'باص جامعي',
-                      subtitle: 'رحلة يومية',
-                      onTap: () {},
-                    ),
-                    ListingCard(
-                      imageUrl:
-                          'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-                      title: 'باص جامعي',
-                      subtitle: 'رحلة يومية',
-                      onTap: () {},
-                    ),
-                    AddServiceCard(
-                      label: 'إضافة خدمة نقل',
-                      onTap: () {
-                        // TODO: Handle Add Transport Service
-                      },
-                    ),
-                    const SizedBox(width: 20),
-                  ],
+                  children: List.generate(5, (index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: ListingCard(
+                        imageUrl:
+                            'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+                        title: 'باص جامعي ${index + 1}',
+                        subtitle: 'رحلة يومية',
+                        onTap: () {},
+                      ),
+                    );
+                  }),
                 ),
               ),
 

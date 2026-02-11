@@ -19,12 +19,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
   late TextEditingController _universityController;
-  late TextEditingController _majorController;
   late TextEditingController _studentIdController;
 
   // Mock Data
   String? _selectedCity;
   final List<String> _cities = ['مكة المكرمة', 'جدة', 'الرياض', 'الدمام'];
+
+  String? _selectedCollege;
+  final List<String> _colleges = [
+    'كلية الحاسب الآلي ونظم المعلومات',
+    'كلية الهندسة',
+    'كلية الطب',
+    'كلية إدارة الأعمال',
+    'كلية الشريعة',
+    'كلية العلوم التطبيقية',
+    'كلية التربية',
+    'كلية الآداب',
+    'كلية الأنظمة',
+  ];
 
   @override
   void initState() {
@@ -34,9 +46,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController = TextEditingController(text: 'ABC@gmail.com');
     _phoneController = TextEditingController(text: '0530202020');
     _universityController = TextEditingController(text: 'جامعة أم القرى');
-    _majorController = TextEditingController(text: 'هندسة البرمجيات');
     _studentIdController = TextEditingController(text: '445******');
     _selectedCity = 'مكة المكرمة';
+    _selectedCollege = 'كلية الحاسب الآلي ونظم المعلومات';
   }
 
   @override
@@ -45,7 +57,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _universityController.dispose();
-    _majorController.dispose();
     _studentIdController.dispose();
     super.dispose();
   }
@@ -155,33 +166,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // University (Disabled/Read-only usually for students but editable here as per screenshot)
+                // University
                 CustomTextField(
                   label: 'الجامعة',
                   hint: 'الجامعة',
                   controller: _universityController,
-                  readOnly: true, // Assuming this comes from verified profile
-                  suffixIcon: const Icon(
-                    Icons.lock_outline,
-                    size: 18,
-                    color: Colors.grey,
-                  ),
+                  validator: (v) => v!.isEmpty ? 'مطلوب' : null,
                   labelAlignment: CrossAxisAlignment.start,
                 ),
                 const SizedBox(height: 16),
 
-                // Major
-                CustomTextField(
-                  label: 'التخصص',
-                  hint: 'التخصص',
-                  controller: _majorController,
-                  readOnly: true,
-                  suffixIcon: const Icon(
-                    Icons.lock_outline,
-                    size: 18,
-                    color: Colors.grey,
-                  ),
-                  labelAlignment: CrossAxisAlignment.start,
+                // College
+                _buildDropdownField(
+                  label: 'الكلية',
+                  value: _selectedCollege,
+                  items: _colleges,
+                  onChanged: (val) => setState(() => _selectedCollege = val),
                 ),
                 const SizedBox(height: 16),
 
@@ -190,12 +190,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   label: 'الرقم الجامعي',
                   hint: 'الرقم الجامعي',
                   controller: _studentIdController,
-                  readOnly: true,
-                  suffixIcon: const Icon(
-                    Icons.lock_outline,
-                    size: 18,
-                    color: Colors.grey,
-                  ),
+                  validator: (v) => v!.isEmpty ? 'مطلوب' : null,
                   labelAlignment: CrossAxisAlignment.start,
                 ),
 
@@ -205,6 +200,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 PrimaryButton(
                   text: 'تعديل',
                   onPressed: () {
+                    if (_selectedCollege == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'الرجاء اختيار الكلية',
+                            style: TextStyle(fontFamily: 'Tajawal'),
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
                     if (_formKey.currentState!.validate()) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

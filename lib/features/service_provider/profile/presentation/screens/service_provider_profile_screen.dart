@@ -110,7 +110,12 @@ class ServiceProviderProfileScreen extends StatelessWidget {
                 iconColor: Colors.grey,
                 showArrow: false,
                 onTap: () {
-                  // Delete Logic
+                  context.push(
+                    Uri(
+                      path: '/delete-account',
+                      queryParameters: {'role': 'provider'},
+                    ).toString(),
+                  );
                 },
               ),
 

@@ -30,10 +30,15 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   ];
 
   final List<String> _colleges = [
-    'هندسة البرمجيات',
-    'علوم الحاسب',
-    'نظم المعلومات',
-    'الهندسة الكهربائية',
+    'كلية الحاسب الآلي ونظم المعلومات',
+    'كلية الهندسة',
+    'كلية الطب',
+    'كلية إدارة الأعمال',
+    'كلية الشريعة',
+    'كلية العلوم التطبيقية',
+    'كلية التربية',
+    'كلية الآداب',
+    'كلية الأنظمة',
   ];
 
   @override
@@ -107,10 +112,10 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
                         // College Dropdown
                         _buildDropdownField(
-                          label: 'الكلية / التخصص',
+                          label: 'الكلية',
                           value: _selectedCollege,
                           items: _colleges,
-                          hint: 'اختر الكلية / التخصص',
+                          hint: 'اختر الكلية',
                           onChanged: (val) {
                             setState(() {
                               _selectedCollege = val;
