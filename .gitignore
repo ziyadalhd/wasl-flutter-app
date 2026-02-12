@@ -1,11 +1,27 @@
 # IDE
 .vscode/
 .idea/
+*.iml
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
+*.log
 
 # Local environment
 .env
 .env.local
+
+# Build artifacts (from subprojects)
+**/build/
+**/target/
+**/node_modules/
+**/.dart_tool/
+
+# Temporary files
+*.zip
+*.tmp
+*.bak

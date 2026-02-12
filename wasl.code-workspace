@@ -1,0 +1,38 @@
+{
+  "folders": [
+    {
+      "name": "🎯 Root",
+      "path": "."
+    },
+    {
+      "name": "📱 Frontend (Flutter)",
+      "path": "frontend"
+    },
+    {
+      "name": "⚙️ Backend (Spring Boot)",
+      "path": "backend"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/build/": true,
+      "**/target/": true,
+      "**/.dart_tool/": true,
+      "**/.idea/": true
+    },
+    "search.exclude": {
+      "**/build/": true,
+      "**/target/": true,
+      "**/.dart_tool/": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "dart-code.flutter",
+      "dart-code.dart-code",
+      "vscjava.vscode-java-pack",
+      "vmware.vscode-spring-boot",
+      "redhat.java"
+    ]
+  }
+}
