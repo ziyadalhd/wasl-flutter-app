@@ -17,6 +17,7 @@ import 'package:wasl/features/student/profile/presentation/screens/support_chat_
 import 'package:wasl/features/student/profile/presentation/screens/terms_conditions_screen.dart';
 import 'package:wasl/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:wasl/features/auth/delete_account_screen.dart';
+import 'package:wasl/features/wallet/presentation/screens/wallet_top_up_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -94,6 +95,10 @@ final appRouter = GoRouter(
         final role = state.uri.queryParameters['role'] ?? 'student';
         return DeleteAccountScreen(role: role);
       },
+    ),
+    GoRoute(
+      path: '/wallet/topup',
+      builder: (context, state) => const WalletTopUpScreen(),
     ),
   ],
 );

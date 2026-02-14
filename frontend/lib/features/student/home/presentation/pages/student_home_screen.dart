@@ -4,7 +4,8 @@ import 'package:wasl/features/student/home/presentation/widgets/student_app_bar.
 import 'package:wasl/features/student/home/presentation/widgets/section_header.dart';
 import 'package:wasl/features/student/home/presentation/widgets/listing_card.dart';
 import 'package:wasl/features/student/home/presentation/widgets/promo_banner.dart';
-import 'package:wasl/features/student/home/presentation/widgets/add_service_card.dart';
+import 'package:wasl/features/wallet/presentation/screens/student_wallet_screen.dart';
+import 'package:wasl/features/chat/presentation/screens/chat_list_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -16,87 +17,32 @@ class StudentHomeScreen extends StatefulWidget {
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   int _selectedIndex = 2; // Default to Home
 
+  // Screens for each tab
+  final List<Widget> _screens = [
+    const StudentWalletScreen(),
+    const ChatListScreen(),
+    const _StudentHomeBody(),
+    const Center(child: Text('الخدمات')), // Placeholder
+    const Center(child: Text('حجوزاتي')), // Placeholder
+  ];
+
   @override
   Widget build(BuildContext context) {
     // Wrap in Directionality to enforce RTL
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        appBar: const StudentAppBar(),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24), // Increased spacing
-              // Housing Section
-              SectionHeader(
-                title: 'السكن',
-                onViewMore: () {
-                  // TODO: Navigate to Housing
-                },
-              ),
-              SizedBox(
-                height: 260, // Increased slightly for better shadow clearance
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 8,
-                  ),
-                  children: List.generate(5, (index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: ListingCard(
-                        imageUrl:
-                            'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-                        title: 'استديو حديث ${index + 1}',
-                        subtitle: '1500 ريال/شهر',
-                        tagText: 'حي الجامعة',
-                        onTap: () {},
-                      ),
-                    );
-                  }),
-                ),
-              ),
+        // Only show AppBar on Home tab?
+        // The other screens have their own Scaffolds/AppBars.
+        // However, we are switching BODIES.
+        // If other screens have Scaffolds, we can't nest Scaffolds easily without issues (e.g. double app bars if we keep this one).
+        // StudentHomeBody needs this AppBar.
+        // Wallet and Chat have their own AppBars in my implementation.
+        // So I should ONLY show this Scaffold's AppBar if _selectedIndex == 2.
+        appBar: _selectedIndex == 2 ? const StudentAppBar() : null,
 
-              const SizedBox(height: 24), // Increased spacing
-              // Transport Section
-              SectionHeader(
-                title: 'النقل',
-                onViewMore: () {
-                  // TODO: Navigate to Transport
-                },
-              ),
-              SizedBox(
-                height: 250, // Increased slightly
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 8,
-                  ),
-                  children: List.generate(5, (index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: ListingCard(
-                        imageUrl:
-                            'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
-                        title: 'باص جامعي ${index + 1}',
-                        subtitle: 'رحلة يومية',
-                        onTap: () {},
-                      ),
-                    );
-                  }),
-                ),
-              ),
+        body: _screens[_selectedIndex],
 
-              // Promo Banner
-              const PromoBanner(),
-
-              const SizedBox(height: 32), // Increased bottom spacing
-            ],
-          ),
-        ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             boxShadow: [
@@ -158,6 +104,82 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _StudentHomeBody extends StatelessWidget {
+  const _StudentHomeBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 24), // Increased spacing
+          // Housing Section
+          SectionHeader(
+            title: 'السكن',
+            onViewMore: () {
+              // TODO: Navigate to Housing
+            },
+          ),
+          SizedBox(
+            height: 260, // Increased slightly for better shadow clearance
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              children: List.generate(5, (index) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: ListingCard(
+                    imageUrl:
+                        'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+                    title: 'استديو حديث ${index + 1}',
+                    subtitle: '1500 ريال/شهر',
+                    tagText: 'حي الجامعة',
+                    onTap: () {},
+                  ),
+                );
+              }),
+            ),
+          ),
+
+          const SizedBox(height: 24), // Increased spacing
+          // Transport Section
+          SectionHeader(
+            title: 'النقل',
+            onViewMore: () {
+              // TODO: Navigate to Transport
+            },
+          ),
+          SizedBox(
+            height: 250, // Increased slightly
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              children: List.generate(5, (index) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: ListingCard(
+                    imageUrl:
+                        'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+                    title: 'باص جامعي ${index + 1}',
+                    subtitle: 'رحلة يومية',
+                    onTap: () {},
+                  ),
+                );
+              }),
+            ),
+          ),
+
+          // Promo Banner
+          const PromoBanner(),
+
+          const SizedBox(height: 32), // Increased bottom spacing
+        ],
       ),
     );
   }
