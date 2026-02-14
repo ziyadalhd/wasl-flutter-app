@@ -107,80 +107,80 @@ class _WalletTopUpScreenState extends State<WalletTopUpScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        height: 64,
+        height: 72,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFF2FA898), // Teal color from design
+          color: isSelected
+              ? AppTheme.primaryColor.withValues(alpha: 0.05)
+              : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: isSelected
-              ? Border.all(color: AppTheme.primaryColor, width: 2)
-              : null,
+          border: Border.all(
+            color: isSelected
+                ? AppTheme.primaryColor
+                : Colors.grey.withValues(alpha: 0.2),
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            if (!isSelected)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+          ],
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Left side (Icon)
-            Icon(icon, color: Colors.white, size: 28),
-
-            // Right side (Label and Check if selected?)
-            // Based on image:
-            // "Credit Card" text is left-aligned (English) or right-aligned (Arabic)?
-            // It says "بطاقة ائتمانية" on the RIGHT.
-            // And "Apple Pay" on the right.
-            // Icons are on the LEFT.
-            // Wait, standard RTL: Icon on Right, Text on Left.
-            // But the image screenshot shows:
-            // "Credit Card Icon" on LEFT. "Text" on RIGHT.
-            // This is LTR layout visually? Or standard customization?
-            // "Wallet top-up Page" Image:
-            // Back arrow on Left. Title "الدفع" Centered/Right.
-            // "Payment Methods" Centered(?).
-            // Button 1: Icon (Card) on Left. Text (Arabic) on Right. Checkmark? No checkmark visible.
-            // Button 2: Icon (Apple) on Left. Text (Apple Pay) on Right.
-
-            // Let's stick to standard Row: [Icon, Spacer, Text].
-            // If direction is RTL, Row starts from Right. So [Icon, Spacer, Text] means Icon is on Right.
-            // But we want Icon on Left and Text on Right (as per screenshot).
-            // So in RTL, we should put Text first, then Spacer, then Icon.
-            Text(
-              label,
-              style: GoogleFonts.tajawal(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            // Icon Container
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppTheme.primaryColor.withValues(alpha: 0.1)
+                    : Colors.grey.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
+                size: 24,
               ),
             ),
-            // In RTL, this text will be on the Right.
+            const SizedBox(width: 16),
 
-            // Wait, if I want Icon on Left and Text on Right in RTL:
-            // I need to use Directionality or just place them in order [Text, Spacer, Icon] ?
-            // BuildContext directionality is likely RTL.
-            // Row in RTL: [Start (Right), ..., End (Left)].
-            // If I put [Text, Spacer, Icon]:
-            // Text is at Start (Right). Spacer. Icon is at End (Left).
-            // Matches screenshot: Text on Right, Icon on Left.
+            // Label
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.tajawal(
+                  fontSize: 16,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? AppTheme.primaryColor
+                      : AppTheme.textColor,
+                ),
+              ),
+            ),
 
-            // BUT, what if the user language is English?
-            // Screenshot has Arabic text.
-            // I'll stick to [Text, Spacer, Icon].
-
-            // The screenshot actually shows:
-            // Item 1: [Icon (Card)] ---------- [Text (Credit Card)] (Selected state maybe?)
-            // Item 2: [Icon (Apple)] ---------- [Text (Apple Pay)]
-
-            // Let's re-examine image 1.
-            // "Wallet top-up Page"
-            // Top-Left: Back Arrow.
-            // Top-Right: "الدفع" (Title).
-            // Middle text: "طرق الدفع"
-            // List Item 1:
-            // Left: Card Icon inside a box? No just icon.
-            // Right: Text "بطاقة ائتمانية".
-            // Background: Teal.
-
-            // OK so visually: Left = Icon. Right = Text.
-            // In RTL (Right to Left): End = Left. Start = Right.
-            // So Icon is at End. Text is at Start.
+            // Selection Indicator (Radio)
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected
+                      ? AppTheme.primaryColor
+                      : Colors.grey.withValues(alpha: 0.4),
+                  width: 2,
+                ),
+                color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+              ),
+              child: isSelected
+                  ? const Icon(Icons.check, size: 16, color: Colors.white)
+                  : null,
+            ),
           ],
         ),
       ),

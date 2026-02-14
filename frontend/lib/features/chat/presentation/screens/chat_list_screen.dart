@@ -22,6 +22,7 @@ class ChatListScreen extends StatelessWidget {
             role: 'طالب',
             message: 'هل السكن متوفر طوال الإجازة...',
             imageUrl: '', // Placeholder
+            time: '10:30 ص',
             hasWarning: true,
             onTap: () {},
           ),
@@ -30,7 +31,8 @@ class ChatListScreen extends StatelessWidget {
             role: 'طالب',
             message: 'وين مكان السكن بالضبط...',
             imageUrl: '', // Placeholder
-            hasWarning: true,
+            time: '09:15 ص',
+            hasWarning: false,
             onTap: () {},
           ),
           ChatListItem(
@@ -38,7 +40,8 @@ class ChatListScreen extends StatelessWidget {
             role: 'طالب',
             message: 'بخصوص الدفع متى يكون...',
             imageUrl: '', // Placeholder
-            hasWarning: true,
+            time: 'أمس',
+            hasWarning: false,
             onTap: () {},
           ),
         ],

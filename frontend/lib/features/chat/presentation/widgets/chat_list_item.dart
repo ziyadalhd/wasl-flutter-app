@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:wasl/core/theme/app_theme.dart';
 
 class ChatListItem extends StatelessWidget {
   final String name;
   final String role;
   final String message;
   final String imageUrl;
+  final String time;
   final bool hasWarning;
   final VoidCallback onTap;
 
@@ -15,6 +17,7 @@ class ChatListItem extends StatelessWidget {
     required this.role,
     required this.message,
     required this.imageUrl,
+    required this.time,
     this.hasWarning = false,
     required this.onTap,
   });
@@ -23,98 +26,142 @@ class ChatListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF2FA898), // Teal color
-          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
         ),
         child: Row(
           children: [
-            // Warning Icon (Far Left in RTL means End? No, Start)
-            // Layout is LTR in code, but Directionality is RTL.
-            // In RTL: Start is Right, End is Left.
-            // Image shows:
-            // [Warning] ... [Text] ... [Avatar]
-            // Left .................... Right
-
-            // So in RTL:
-            // [Avatar] [Text] [Spacer] [Warning]
-            // Start .................... End
-
-            // Let's build standard Row order for RTL:
-
-            // Avatar
-            CircleAvatar(
-              radius: 24,
-              backgroundImage: NetworkImage(imageUrl),
-              backgroundColor: Colors.grey[200],
-              child: imageUrl.isEmpty
-                  ? const Icon(Icons.person, color: Colors.grey)
-                  : null,
+            // Avatar with Warning Indicator
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundImage: imageUrl.isNotEmpty
+                      ? NetworkImage(imageUrl)
+                      : null,
+                  backgroundColor: Colors.grey[100],
+                  child: imageUrl.isEmpty
+                      ? const Icon(Icons.person, color: Colors.grey)
+                      : null,
+                ),
+                if (hasWarning)
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.amber,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.priority_high,
+                        size: 10,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+              ],
             ),
 
             const SizedBox(width: 12),
 
-            // Name and Message
+            // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Header Row: Name + Time
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        name,
-                        style: GoogleFonts.tajawal(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      // Name & Role
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                name,
+                                style: GoogleFonts.tajawal(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.textColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryColor.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                role,
+                                style: GoogleFonts.tajawal(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      // Verify Icon if needed?
-                      const Icon(
-                        Icons.check_circle,
-                        color: Colors.black,
-                        size: 14,
+
+                      // Time
+                      Text(
+                        time,
+                        style: GoogleFonts.tajawal(
+                          fontSize: 12,
+                          color: AppTheme.subtitleColor,
+                        ),
                       ),
-                      // The image shows a small checkmark next to name? Or is it part of name?
-                      // "Muaath Buqus <Check>"
-                      // It's a black checkmark.
                     ],
                   ),
-                  Text(
-                    role,
-                    style: GoogleFonts.tajawal(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.9),
-                    ),
-                  ),
+
                   const SizedBox(height: 4),
-                  Text(
-                    message,
-                    style: GoogleFonts.tajawal(
-                      fontSize: 12,
-                      color: Colors.white.withValues(alpha: 0.8),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+
+                  // Message Preview
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          message,
+                          style: GoogleFonts.tajawal(
+                            fontSize: 13,
+                            color: AppTheme.subtitleColor,
+                            height: 1.4,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-
-            // Warning Icon (Left side)
-            if (hasWarning)
-              Icon(
-                Icons.warning_amber_rounded, // Triangle with !
-                color: Colors.black.withValues(
-                  alpha: 0.5,
-                ), // Looks like dark grey/black outline
-                size: 24,
-              ),
           ],
         ),
       ),

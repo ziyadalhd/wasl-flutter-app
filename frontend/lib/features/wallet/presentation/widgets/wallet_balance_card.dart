@@ -52,12 +52,21 @@ class WalletBalanceCard extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text: ' ﷼',
-                  style: GoogleFonts.tajawal(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
+                  children: [
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Image.asset(
+                          'assets/icons/Saudi_Riyal_Symbol.svg.png',
+                          width: 24,
+                          height: 24,
+                          color: Colors
+                              .white, // Tint to match text color if needed, or keep original
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
