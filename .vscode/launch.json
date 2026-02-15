@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "WaslApplication",
+            "request": "launch",
+            "mainClass": "com.example.Wasl.WaslApplication",
+            "projectName": "Wasl"
+        },
+        {
             "name": "wasl-flutter-app",
             "request": "launch",
             "type": "dart"

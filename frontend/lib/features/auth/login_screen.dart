@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wasl/core/components/custom_text_field.dart';
 import 'package:wasl/core/components/primary_button.dart';
+import 'package:wasl/core/services/api_client.dart';
+import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -15,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -23,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     bool valid = _formKey.currentState?.validate() ?? false;
     if (!valid) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -39,35 +42,47 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     final email = _emailController.text.trim();
-    // 2.b.1 Inactive
-    if (email == 'inactive@wasl.com') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'الحساب غير مفعل. الرجاء التواصل مع الدعم الفني.',
-            textAlign: TextAlign.right,
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-    // 2.a.1 Incorrect
-    if (email == 'wrong@wasl.com') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
-            textAlign: TextAlign.right,
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    final password = _passwordController.text;
 
-    // Success (Mock)
-    context.go('/student/home');
+    setState(() => _isLoading = true);
+
+    try {
+      await AuthService.login(email, password);
+
+      if (!mounted) return;
+
+      // Fetch user profile to determine the active mode
+      final me = await AuthService.getMe();
+
+      if (!mounted) return;
+
+      if (me.mode == 'STUDENT') {
+        context.go('/student/home');
+      } else {
+        context.go('/service_provider/home');
+      }
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.userMessage, textAlign: TextAlign.right),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'حدث خطأ غير متوقع. الرجاء المحاولة لاحقاً.',
+            textAlign: TextAlign.right,
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   String? _validateEmail(String? value) {
@@ -149,7 +164,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 32),
 
                 // Login Button
-                PrimaryButton(text: 'تسجيل دخول', onPressed: _submit),
+                PrimaryButton(
+                  text: 'تسجيل دخول',
+                  onPressed: _submit,
+                  isLoading: _isLoading,
+                ),
 
                 const SizedBox(height: 24),
 

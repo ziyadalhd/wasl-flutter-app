@@ -41,7 +41,10 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/password',
-      builder: (context, state) => const PasswordScreen(),
+      builder: (context, state) {
+        final signupData = state.extra as Map<String, dynamic>?;
+        return PasswordScreen(signupData: signupData);
+      },
     ),
     GoRoute(
       path: '/welcome',

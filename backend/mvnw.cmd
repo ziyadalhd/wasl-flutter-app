@@ -51,7 +51,14 @@ if ($env:MVNW_VERBOSE -eq "true") {
 }
 
 # calculate distributionUrl, requires .mvn/wrapper/maven-wrapper.properties
-$distributionUrl = (Get-Content -Raw "$scriptDir/.mvn/wrapper/maven-wrapper.properties" | ConvertFrom-StringData).distributionUrl
+Write-Output "Debug: scriptDir is '$scriptDir'"
+$propPath = Join-Path $scriptDir ".mvn/wrapper/maven-wrapper.properties"
+Write-Output "Debug: propPath is '$propPath'"
+if (-not (Test-Path $propPath)) {
+  Write-Error "Cannot find property file at $propPath"
+  exit 1
+}
+$distributionUrl = (Get-Content -Raw $propPath | ConvertFrom-StringData).distributionUrl
 if (!$distributionUrl) {
   Write-Error "cannot read distributionUrl property in $scriptDir/.mvn/wrapper/maven-wrapper.properties"
 }
