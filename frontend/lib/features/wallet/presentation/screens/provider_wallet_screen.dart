@@ -28,6 +28,11 @@ class ProviderWalletScreen extends StatelessWidget {
               onAddMoney: () {
                 context.push('/wallet/topup');
               },
+              onWithdraw: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('سيتم تفعيل سحب المبلغ قريباً')),
+                );
+              },
             ),
             const SizedBox(height: 30),
             Text(

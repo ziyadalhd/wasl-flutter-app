@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/wallet/presentation/widgets/wallet_balance_card.dart';
+import 'package:wasl/features/wallet/presentation/widgets/transaction_item.dart';
 import 'package:go_router/go_router.dart';
 
 class StudentWalletScreen extends StatelessWidget {
@@ -27,24 +28,45 @@ class StudentWalletScreen extends StatelessWidget {
               onAddMoney: () {
                 context.push('/wallet/topup');
               },
+              onWithdraw: () {
+                // Dummy action for now
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('سيتم تفعيل سحب المبلغ قريباً')),
+                );
+              },
             ),
-
-            // No transaction list for Student as requested
-            // But maybe we can show an empty state or just the card?
-            // "Student also has a Wallet screen similar to Provider but without transactions."
-            // So just the card is fine, and maybe some informative text?
-            // Or maybe "Last Operations" but empty?
-            // I'll stick to just the card for now to be safe, maybe add a spacer.
-            const SizedBox(height: 40),
-            Center(
-              child: Text(
-                'رصيدك الحالي في المحفظة',
-                style: GoogleFonts.tajawal(
-                  fontSize: 14,
-                  color: AppTheme.subtitleColor,
-                ),
+            const SizedBox(height: 30),
+            Text(
+              'آخر العمليات',
+              style: GoogleFonts.tajawal(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textColor,
               ),
             ),
+            const SizedBox(height: 16),
+            // Replicating transactions from Provider Wallet as requested
+            const TransactionItem(
+              title: 'إيداع مبلغ خدمة ( سكن )',
+              date: '19 Nov',
+              isDeposit: true,
+            ),
+            const TransactionItem(
+              title: 'سحب مبلغ خدمة ( نقل )',
+              date: '6 Nov',
+              isDeposit: false,
+            ),
+            const TransactionItem(
+              title: 'إيداع مبلغ خدمة ( سكن )',
+              date: '22 Oct',
+              isDeposit: true,
+            ),
+            const TransactionItem(
+              title: 'إيداع مبلغ خدمة ( سكن )',
+              date: '17 Oct',
+              isDeposit: true,
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),

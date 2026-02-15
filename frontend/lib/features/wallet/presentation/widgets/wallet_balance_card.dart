@@ -4,12 +4,14 @@ import 'package:google_fonts/google_fonts.dart';
 class WalletBalanceCard extends StatelessWidget {
   final double balance;
   final VoidCallback onAddMoney;
+  final VoidCallback? onWithdraw;
   final bool showAddMoney;
 
   const WalletBalanceCard({
     super.key,
     required this.balance,
     required this.onAddMoney,
+    this.onWithdraw,
     this.showAddMoney = true,
   });
 
@@ -61,8 +63,7 @@ class WalletBalanceCard extends StatelessWidget {
                           'assets/icons/Saudi_Riyal_Symbol.svg.png',
                           width: 24,
                           height: 24,
-                          color: Colors
-                              .white, // Tint to match text color if needed, or keep original
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -73,38 +74,84 @@ class WalletBalanceCard extends StatelessWidget {
           ),
           if (showAddMoney) ...[
             const SizedBox(height: 20),
-            InkWell(
-              onTap: onAddMoney,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.add, color: Colors.white, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'إضافة مبلغ للمحفظة',
-                      style: GoogleFonts.tajawal(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+            Row(
+              children: [
+                // Right Button (in RTL): Add Amount
+                Expanded(
+                  child: InkWell(
+                    onTap: onAddMoney,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      height: 48, // Fixed height for consistency
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.add, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'إضافة مبلغ',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 14, // Adjusted for space
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                // Left Button (in RTL): Withdraw Amount
+                Expanded(
+                  child: InkWell(
+                    onTap: onWithdraw,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      height: 48, // Fixed height for consistency
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.remove, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'سحب مبلغ',
+                            style: GoogleFonts.tajawal(
+                              fontSize: 14, // Adjusted for space
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ],

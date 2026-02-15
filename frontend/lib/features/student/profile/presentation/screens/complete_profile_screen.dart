@@ -18,15 +18,29 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   // Controllers
   final TextEditingController _studentIdController = TextEditingController();
 
-  // Dropdown Values (Mock Data)
+  // Dropdown Values
   String? _selectedUniversity;
   String? _selectedCollege;
 
+  // Validation State
+  bool _isFormValid = false;
+
   final List<String> _universities = [
-    'جامعة أم القرى',
-    'جامعة الملك عبدالعزيز',
     'جامعة الملك سعود',
-    'جامعة جدة',
+    'جامعة الملك عبدالعزيز',
+    'جامعة أم القرى',
+    'جامعة الإمام محمد بن سعود الإسلامية',
+    'جامعة الأميرة نورة بنت عبدالرحمن',
+    'جامعة الملك فهد للبترول والمعادن',
+    'جامعة الملك خالد',
+    'جامعة طيبة',
+    'جامعة القصيم',
+    'جامعة الإمام عبدالرحمن بن فيصل',
+    'جامعة جازان',
+    'جامعة تبوك',
+    'جامعة الجوف',
+    'جامعة نجران',
+    'جامعة الحدود الشمالية',
   ];
 
   final List<String> _colleges = [
@@ -42,9 +56,33 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Add listeners to re-validate form on change
+    _studentIdController.addListener(_validateForm);
+  }
+
+  @override
   void dispose() {
+    _studentIdController.removeListener(_validateForm);
     _studentIdController.dispose();
     super.dispose();
+  }
+
+  void _validateForm() {
+    final isValid = _formKey.currentState?.validate() ?? false;
+    // Check dropdowns manually since they aren't part of the text field controller listeners directly
+    // but the validator will run. However, for button state we need to check values.
+    final hasUniversity = _selectedUniversity != null;
+    final hasCollege = _selectedCollege != null;
+    final hasStudentId = _studentIdController.text.isNotEmpty;
+
+    // We can also use form validation, but for the disabled state
+    // it's often smoother to check values directly to avoid red error messages appearing too early.
+    // Let's rely on values for the button enable/disable.
+    setState(() {
+      _isFormValid = hasUniversity && hasCollege && hasStudentId;
+    });
   }
 
   @override
@@ -61,6 +99,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Form(
                     key: _formKey,
+                    onChanged: _validateForm, // Re-validate on any form field change
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -80,7 +119,6 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                         const SizedBox(height: 30),
 
                         // 2. Logo (Big "Wasl" text)
-                        // Using Text as existing assets are not clear, but trying to match style from Splash
                         Text(
                           'وَصِل.',
                           style: GoogleFonts.tajawal(
@@ -101,9 +139,16 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                           value: _selectedUniversity,
                           items: _universities,
                           hint: 'اختر الجامعة',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'الرجاء اختيار الجامعة';
+                            }
+                            return null;
+                          },
                           onChanged: (val) {
                             setState(() {
                               _selectedUniversity = val;
+                              _validateForm();
                             });
                           },
                         ),
@@ -116,9 +161,16 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                           value: _selectedCollege,
                           items: _colleges,
                           hint: 'اختر الكلية',
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'الرجاء اختيار الكلية';
+                            }
+                            return null;
+                          },
                           onChanged: (val) {
                             setState(() {
                               _selectedCollege = val;
+                              _validateForm();
                             });
                           },
                         ),
@@ -128,8 +180,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                         // Student ID Field
                         CustomTextField(
                           label: 'الرقم الجامعي',
-                          hint:
-                              '446*******', // Matching screenshot placeholder style
+                          hint: '446*******',
                           controller: _studentIdController,
                           keyboardType: TextInputType.number,
                           validator: (value) {
@@ -139,6 +190,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                             return null;
                           },
                           labelAlignment: CrossAxisAlignment.start,
+                          // Note: CustomTextField internally might not trigger Form.onChanged well if it doesn't wrap TextFormField correctly with onChanged.
+                          // But we added listener to _studentIdController in initState.
                         ),
 
                         const SizedBox(height: 40),
@@ -146,17 +199,17 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                         // 4. Action Button
                         PrimaryButton(
                           text: 'إكمال',
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              // If we were pushed here (from Profile), pop with result true
-                              if (context.canPop()) {
-                                context.pop(true);
-                              } else {
-                                // Fallback if navigated directly or differently
-                                context.go('/student/home');
-                              }
-                            }
-                          },
+                          onPressed: _isFormValid
+                              ? () {
+                                  if (_formKey.currentState!.validate()) {
+                                    if (context.canPop()) {
+                                      context.pop(true);
+                                    } else {
+                                      context.go('/student/home');
+                                    }
+                                  }
+                                }
+                              : null, // Disabled if invalid
                         ),
 
                         const SizedBox(height: 20),
@@ -165,9 +218,6 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                   ),
                 ),
               ),
-
-              // 5. Custom Static Bottom Nav Bar (Visual Only for this screen as per request)
-              // Removed as part of UX review to avoid duplicate nav
             ],
           ),
         ),
@@ -181,6 +231,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     required List<String> items,
     required String hint,
     required Function(String?) onChanged,
+    String? Function(String?)? validator,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -194,46 +245,56 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value,
-              hint: Text(
-                hint,
-                style: TextStyle(
-                  color: Colors.grey.withValues(alpha: 0.6),
-                  fontSize: 14,
-                  fontFamily: 'Tajawal',
-                ),
-              ),
-              isExpanded: true,
-              icon: const Icon(
-                Icons.keyboard_arrow_down_rounded,
-                color: Colors.grey,
-              ),
-              items: items.map((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(
-                    item,
-                    style: const TextStyle(
-                      fontFamily: 'Tajawal',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                );
-              }).toList(),
-              onChanged: onChanged,
+        DropdownButtonFormField<String>(
+          value: value,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              dropdownColor: Colors.white,
+              borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppTheme.primaryColor),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            hintText: hint,
+            hintStyle: TextStyle(
+              color: Colors.grey.withValues(alpha: 0.6),
+              fontSize: 14,
+              fontFamily: 'Tajawal',
             ),
           ),
+          icon: const Icon(
+            Icons.keyboard_arrow_down_rounded,
+            color: Colors.grey,
+          ),
+          isExpanded: true,
+          style: const TextStyle(
+            fontFamily: 'Tajawal',
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+            fontSize: 14,
+          ),
+          items: items.map((String item) {
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Text(item),
+            );
+          }).toList(),
+          onChanged: onChanged,
+          validator: validator,
+          dropdownColor: Colors.white,
+          borderRadius: BorderRadius.circular(16),
         ),
       ],
     );
