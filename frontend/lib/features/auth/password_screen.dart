@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wasl/core/components/custom_text_field.dart';
 import 'package:wasl/core/components/primary_button.dart';
+import 'package:wasl/core/services/api_client.dart';
+import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 
 class PasswordScreen extends StatefulWidget {
-  const PasswordScreen({super.key});
+  final Map<String, dynamic>? signupData;
+
+  const PasswordScreen({super.key, this.signupData});
 
   @override
   State<PasswordScreen> createState() => _PasswordScreenState();
@@ -16,6 +20,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _agreedToTerms = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -24,7 +29,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     bool formValid = _formKey.currentState?.validate() ?? false;
 
     if (!formValid) {
@@ -32,7 +37,6 @@ class _PasswordScreenState extends State<PasswordScreen> {
     }
 
     if (!_agreedToTerms) {
-      // 2.a.1
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -45,8 +49,67 @@ class _PasswordScreenState extends State<PasswordScreen> {
       return;
     }
 
-    // Success
-    context.push('/welcome');
+    // Collect data from previous signup screen
+    final data = widget.signupData;
+    if (data == null) {
+      // Fallback: no signup data was passed — navigate as before
+      context.push('/welcome');
+      return;
+    }
+
+    final fullName = data['fullName'] as String? ?? '';
+    final email = data['email'] as String? ?? '';
+    final phone = data['phone'] as String? ?? '';
+    final role = data['role'] as String?;
+    final password = _passwordController.text;
+
+    // Determine mode and roles from the selected role
+    final String mode;
+    final List<String> rolesWanted;
+    if (role != null && role.toLowerCase().contains('provider')) {
+      mode = 'PROVIDER';
+      rolesWanted = ['PROVIDER'];
+    } else {
+      mode = 'STUDENT';
+      rolesWanted = ['STUDENT'];
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      await AuthService.register(
+        email: email,
+        phone: phone.isNotEmpty ? phone : null,
+        password: password,
+        fullName: fullName,
+        mode: mode,
+        rolesWanted: rolesWanted,
+      );
+
+      if (!mounted) return;
+      context.push('/welcome');
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.userMessage, textAlign: TextAlign.right),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'حدث خطأ غير متوقع. الرجاء المحاولة لاحقاً.',
+            textAlign: TextAlign.right,
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   String? _validatePassword(String? value) {
@@ -173,7 +236,11 @@ class _PasswordScreenState extends State<PasswordScreen> {
                 const SizedBox(height: 40),
 
                 // Register Button
-                PrimaryButton(text: 'التالي', onPressed: _submit),
+                PrimaryButton(
+                  text: 'التالي',
+                  onPressed: _submit,
+                  isLoading: _isLoading,
+                ),
               ],
             ),
           ),

@@ -115,8 +115,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Success
-    context.push('/password');
+    // Success — pass collected data to password screen
+    final signupData = {
+      'fullName':
+          '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
+      'email': _emailController.text.trim(),
+      'phone': _phoneController.text.trim(),
+      'role': widget.role, // may be null
+    };
+    context.push('/password', extra: signupData);
   }
 
   // Validators

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wasl/core/services/auth_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -38,12 +39,39 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // Navigate to Onboarding after a delay
+    // Check for existing session after splash animation
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        context.go('/onboarding');
-      }
+      if (mounted) _checkSession();
     });
+  }
+
+  Future<void> _checkSession() async {
+    try {
+      final loggedIn = await AuthService.isLoggedIn();
+      if (!mounted) return;
+
+      if (loggedIn) {
+        // Token exists — fetch profile to get active mode
+        try {
+          final me = await AuthService.getMe();
+          if (!mounted) return;
+
+          if (me.mode == 'STUDENT') {
+            context.go('/student/home');
+          } else {
+            context.go('/service_provider/home');
+          }
+          return;
+        } catch (_) {
+          // Token expired or invalid — clear it and go to onboarding
+          await AuthService.logout();
+        }
+      }
+
+      if (mounted) context.go('/onboarding');
+    } catch (_) {
+      if (mounted) context.go('/onboarding');
+    }
   }
 
   @override
