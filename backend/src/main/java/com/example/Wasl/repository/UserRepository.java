@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByPhone(String phone);
+
     @EntityGraph(attributePaths = { "studentProfile" })
     @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findByIdWithStudentProfile(@Param("id") UUID id);

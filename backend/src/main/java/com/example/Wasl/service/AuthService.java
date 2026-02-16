@@ -83,6 +83,10 @@ public class AuthService implements UserDetailsService {
             throw new BusinessRuleException("Email already registered");
         }
 
+        if (userRepository.findByPhone(phone).isPresent()) {
+            throw new BusinessRuleException("Phone number already registered");
+        }
+
         User user = User.builder()
                 .email(email)
                 .phone(phone)

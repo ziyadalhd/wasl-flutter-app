@@ -1,0 +1,8 @@
+{
+  "email": "test_debug_99@example.com",
+  "phone": "0599999999",
+  "password": "password123",
+  "fullName": "Debug User",
+  "mode": "STUDENT",
+  "rolesWanted": ["STUDENT"]
+}

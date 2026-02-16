@@ -95,6 +95,21 @@ public class GlobalExceptionHandler {
                 ex.getMessage(), request);
     }
 
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
+            org.springframework.dao.DataIntegrityViolationException ex, HttpServletRequest request) {
+
+        String message = "Database error: Constraint violation";
+        if (ex.getMessage() != null && ex.getMessage().contains("users_phone_key")) {
+            message = "Phone number already registered";
+        } else if (ex.getMessage() != null && ex.getMessage().contains("users_email_key")) {
+            message = "Email already registered";
+        }
+
+        return buildResponse(HttpStatus.CONFLICT, "Conflict",
+                message, request);
+    }
+
     // ── 500 Internal Server Error ───────────────────────────────────
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleAll(
