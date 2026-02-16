@@ -18,6 +18,8 @@ import 'package:wasl/features/student/profile/presentation/screens/terms_conditi
 import 'package:wasl/features/notifications/presentation/screens/notifications_screen.dart';
 import 'package:wasl/features/auth/delete_account_screen.dart';
 import 'package:wasl/features/wallet/presentation/screens/wallet_top_up_screen.dart';
+import 'package:wasl/features/wallet/presentation/screens/withdraw_screen.dart';
+import 'package:wasl/features/wallet/presentation/screens/withdraw_success_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -99,6 +101,17 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/wallet/topup',
       builder: (context, state) => const WalletTopUpScreen(),
+    ),
+    GoRoute(
+      path: '/wallet/withdraw',
+      builder: (context, state) {
+        final double balance = state.extra as double? ?? 0.0;
+        return WithdrawScreen(currentBalance: balance);
+      },
+    ),
+    GoRoute(
+      path: '/wallet/withdraw/success',
+      builder: (context, state) => const WithdrawSuccessScreen(),
     ),
   ],
 );
