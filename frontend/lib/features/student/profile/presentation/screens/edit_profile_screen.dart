@@ -18,12 +18,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
-  late TextEditingController _universityController;
+  // late TextEditingController _universityController; // Removed
   late TextEditingController _studentIdController;
 
   // Mock Data
   String? _selectedCity;
   final List<String> _cities = ['مكة المكرمة', 'جدة', 'الرياض', 'الدمام'];
+
+  String? _selectedUniversity;
+  final List<String> _universities = [
+    'جامعة الملك سعود',
+    'جامعة الملك عبدالعزيز',
+    'جامعة أم القرى',
+    'جامعة الإمام محمد بن سعود الإسلامية',
+    'جامعة الأميرة نورة بنت عبدالرحمن',
+    'جامعة الملك فهد للبترول والمعادن',
+    'جامعة الملك خالد',
+    'جامعة طيبة',
+    'جامعة القصيم',
+    'جامعة الإمام عبدالرحمن بن فيصل',
+    'جامعة جازان',
+    'جامعة تبوك',
+    'جامعة الجوف',
+    'جامعة نجران',
+    'جامعة الحدود الشمالية',
+  ];
 
   String? _selectedCollege;
   final List<String> _colleges = [
@@ -45,8 +64,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _nameController = TextEditingController(text: 'فارس المقبل');
     _emailController = TextEditingController(text: 'ABC@gmail.com');
     _phoneController = TextEditingController(text: '0530202020');
-    _universityController = TextEditingController(text: 'جامعة أم القرى');
+    // _universityController = TextEditingController(text: 'جامعة أم القرى'); // Removed
+    _selectedUniversity = 'جامعة أم القرى';
     _studentIdController = TextEditingController(text: '445******');
+    // _selectedCity is initialized at declaration or here
     _selectedCity = 'مكة المكرمة';
     _selectedCollege = 'كلية الحاسب الآلي ونظم المعلومات';
   }
@@ -56,7 +77,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _universityController.dispose();
+    // _universityController.dispose(); // Removed
     _studentIdController.dispose();
     super.dispose();
   }
@@ -107,6 +128,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           padding: const EdgeInsets.all(20),
           child: Form(
             key: _formKey,
+            // autovalidateMode: AutovalidateMode.onUserInteraction, // Removed to prevent global validation
             child: Column(
               children: [
                 // Name Fields Row
@@ -134,7 +156,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
+                
                 // Email
                 CustomTextField(
                   label: 'البريد الإلكتروني',
@@ -166,14 +188,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // University
-                CustomTextField(
+                // University Dropdown (Replaces TextField)
+                _buildDropdownField(
                   label: 'الجامعة',
-                  hint: 'الجامعة',
-                  controller: _universityController,
-                  validator: (v) => v!.isEmpty ? 'مطلوب' : null,
-                  labelAlignment: CrossAxisAlignment.start,
-                ),
+                  value: _selectedUniversity,
+                  items: _universities,
+                  onChanged: (val) => setState(() => _selectedUniversity = val),
+                 ),
                 const SizedBox(height: 16),
 
                 // College
@@ -200,6 +221,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 PrimaryButton(
                   text: 'تعديل',
                   onPressed: () {
+                    if (_selectedUniversity == null) {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'الرجاء اختيار الجامعة',
+                            style: TextStyle(fontFamily: 'Tajawal'),
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
                     if (_selectedCollege == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -226,6 +259,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     }
                   },
                 ),
+
                 const SizedBox(height: 20),
               ],
             ),
@@ -262,8 +296,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value,
+            child: DropdownButtonFormField<String>( // Changed to DropdownButtonFormField to support validation
+              autovalidateMode: AutovalidateMode.onUserInteraction, // Added here
+              initialValue: value,
               isExpanded: true,
               icon: const Icon(
                 Icons.keyboard_arrow_down_rounded,

@@ -70,16 +70,11 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   }
 
   void _validateForm() {
-    final isValid = _formKey.currentState?.validate() ?? false;
-    // Check dropdowns manually since they aren't part of the text field controller listeners directly
-    // but the validator will run. However, for button state we need to check values.
+    // Check values directly to update button state without triggering error messages
     final hasUniversity = _selectedUniversity != null;
     final hasCollege = _selectedCollege != null;
     final hasStudentId = _studentIdController.text.isNotEmpty;
 
-    // We can also use form validation, but for the disabled state
-    // it's often smoother to check values directly to avoid red error messages appearing too early.
-    // Let's rely on values for the button enable/disable.
     setState(() {
       _isFormValid = hasUniversity && hasCollege && hasStudentId;
     });
@@ -99,7 +94,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Form(
                     key: _formKey,
-                    onChanged: _validateForm, // Re-validate on any form field change
+                    // autovalidateMode: AutovalidateMode.onUserInteraction, // Removed to prevent global validation
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -115,7 +110,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                                 color: AppTheme.textColor,
                               ),
                         ),
-
+                        
                         const SizedBox(height: 30),
 
                         // 2. Logo (Big "Wasl" text)
@@ -174,7 +169,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                             });
                           },
                         ),
-
+                        
                         const SizedBox(height: 20),
 
                         // Student ID Field
@@ -190,8 +185,6 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                             return null;
                           },
                           labelAlignment: CrossAxisAlignment.start,
-                          // Note: CustomTextField internally might not trigger Form.onChanged well if it doesn't wrap TextFormField correctly with onChanged.
-                          // But we added listener to _studentIdController in initState.
                         ),
 
                         const SizedBox(height: 40),
@@ -213,6 +206,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                         ),
 
                         const SizedBox(height: 20),
+                        
                       ],
                     ),
                   ),
@@ -246,7 +240,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
-          value: value,
+          autovalidateMode: AutovalidateMode.onUserInteraction, // Added here
+          initialValue: value,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,

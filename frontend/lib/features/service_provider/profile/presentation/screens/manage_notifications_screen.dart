@@ -157,7 +157,7 @@ class _ServiceProviderManageNotificationsScreenState
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: Colors.white,
+              activeThumbColor: Colors.white,
               activeTrackColor: const Color(0xFF80CBC4), // Lighter teal
               inactiveThumbColor: Colors.white,
               inactiveTrackColor: Colors.white.withValues(alpha: 0.3),

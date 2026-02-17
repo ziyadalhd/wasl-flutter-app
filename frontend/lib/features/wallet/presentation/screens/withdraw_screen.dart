@@ -101,7 +101,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                         Switch(
                           value: _useFullBalance,
                           onChanged: _toggleFullBalance,
-                          activeColor: AppTheme.primaryColor,
+                          activeThumbColor: AppTheme.primaryColor,
                         ),
                       ],
                     ),
