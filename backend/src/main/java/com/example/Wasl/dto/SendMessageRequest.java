@@ -1,17 +1,10 @@
 package com.example.Wasl.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Data
 public class SendMessageRequest {
-
-    @NotBlank(message = "Content is required")
+    @NotBlank(message = "Message content is required")
     private String content;
 }
