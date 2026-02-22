@@ -107,6 +107,20 @@ class ApiClient {
     }
   }
 
+  /// Sends a **DELETE** request.
+  static Future<Map<String, dynamic>> delete(
+    String path, {
+    bool auth = true,
+  }) async {
+    final uri = Uri.parse('$baseUrl$path');
+    try {
+      final response = await http.delete(uri, headers: await _headers(auth: auth));
+      return _handleResponse(response);
+    } catch (e) {
+      throw _wrapConnectionError(e);
+    }
+  }
+
   // ── Response handling ────────────────────────────────────────────────────
 
   static Map<String, dynamic> _handleResponse(http.Response response) {

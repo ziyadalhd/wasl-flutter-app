@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wasl/core/components/custom_text_field.dart';
 import 'package:wasl/core/components/primary_button.dart';
+import 'package:wasl/core/models/models.dart';
+import 'package:wasl/core/services/api_client.dart';
+import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -15,48 +18,196 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
   // Controllers
-  late TextEditingController _nameController;
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
-  late TextEditingController _universityController;
   late TextEditingController _studentIdController;
 
-  // Mock Data
   String? _selectedCity;
   final List<String> _cities = ['مكة المكرمة', 'جدة', 'الرياض', 'الدمام'];
 
-  String? _selectedCollege;
-  final List<String> _colleges = [
-    'كلية الحاسب الآلي ونظم المعلومات',
-    'كلية الهندسة',
-    'كلية الطب',
-    'كلية إدارة الأعمال',
-    'كلية الشريعة',
-    'كلية العلوم التطبيقية',
-    'كلية التربية',
-    'كلية الآداب',
-    'كلية الأنظمة',
+  String? _selectedUniversity;
+  final List<String> _universities = [
+    'جامعة أم القرى',
+    'جامعة الملك عبدالعزيز',
+    'جامعة الملك سعود',
+    'جامعة الملك فهد للبترول والمعادن',
+    'جامعة الملك فيصل',
+    'جامعة الملك خالد',
+    'الجامعة الإسلامية بالمدينة المنورة',
+    'جامعة الإمام محمد بن سعود الإسلامية',
+    'جامعة طيبة',
+    'جامعة القصيم',
+    'جامعة حائل',
+    'جامعة جازان',
+    'جامعة الجوف',
+    'جامعة تبوك',
+    'جامعة نجران',
+    'جامعة الباحة',
+    'جامعة الحدود الشمالية',
+    'جامعة الأمير سطام بن عبدالعزيز',
+    'جامعة شقراء',
+    'جامعة المجمعة',
+    'جامعة الطائف',
+    'جامعة بيشة',
+    'جامعة جدة',
+    'جامعة حفر الباطن',
+    'جامعة الأميرة نورة بنت عبدالرحمن',
+    'جامعة الملك سعود بن عبدالعزيز للعلوم الصحية',
+    'جامعة الملك عبدالله للعلوم والتقنية',
+    'الجامعة السعودية الإلكترونية',
+    'جامعة الأمير سلطان',
+    'جامعة دار الحكمة',
   ];
+
+  String? _selectedCollege;
+  List<String> _colleges = [];
+
+  bool _isLoading = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize with mock data based on screenshot
-    _nameController = TextEditingController(text: 'فارس المقبل');
-    _emailController = TextEditingController(text: 'ABC@gmail.com');
-    _phoneController = TextEditingController(text: '0530202020');
-    _universityController = TextEditingController(text: 'جامعة أم القرى');
-    _studentIdController = TextEditingController(text: '445******');
-    _selectedCity = 'مكة المكرمة';
-    _selectedCollege = 'كلية الحاسب الآلي ونظم المعلومات';
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
+    _emailController = TextEditingController();
+    _phoneController = TextEditingController();
+
+    _studentIdController = TextEditingController();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      // Fetch user profile and colleges in parallel
+      final results = await Future.wait([
+        AuthService.getMe(),
+        AuthService.getColleges(),
+      ]);
+
+      final meResponse = results[0] as MeResponse;
+      final collegesList = results[1] as List<Map<String, dynamic>>;
+
+      final user = meResponse.user;
+      final profile = meResponse.profile as StudentProfileDTO?;
+
+      // Split fullName into first and last
+      final nameParts = (user.fullName).split(' ');
+      final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+      final collegeNames = collegesList.map((c) => c['name'] as String).toList();
+
+      if (mounted) {
+        setState(() {
+          _firstNameController.text = firstName;
+          _lastNameController.text = lastName;
+          _emailController.text = user.email;
+          _phoneController.text = user.phone ?? '';
+          _selectedCity = user.city;
+          _selectedUniversity = _universities.contains(profile?.universityName)
+              ? profile?.universityName
+              : null;
+          _studentIdController.text = profile?.universityId ?? '';
+          _colleges = collegeNames;
+
+          // Match college from profile
+          if (profile?.collegeName != null && collegeNames.contains(profile!.collegeName)) {
+            _selectedCollege = profile.collegeName;
+          }
+
+          _isLoading = false;
+        });
+      }
+    } on ApiException catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.userMessage, style: const TextStyle(fontFamily: 'Tajawal')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('حدث خطأ في تحميل البيانات', style: TextStyle(fontFamily: 'Tajawal')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    if (_selectedCollege == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('الرجاء اختيار الكلية', style: TextStyle(fontFamily: 'Tajawal')),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isSaving = true);
+
+    try {
+      final fullName = '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
+
+      await AuthService.updateProfile({
+        'fullName': fullName,
+        'phone': _phoneController.text.trim(),
+        'city': _selectedCity,
+        'universityId': _studentIdController.text.trim(),
+        'universityName': _selectedUniversity,
+        'collegeName': _selectedCollege,
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تم تحديث البيانات بنجاح', style: TextStyle(fontFamily: 'Tajawal')),
+            backgroundColor: AppTheme.primaryColor,
+          ),
+        );
+        context.pop(true); // Return true to indicate changes were saved
+      }
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.userMessage, style: const TextStyle(fontFamily: 'Tajawal')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('حدث خطأ أثناء حفظ البيانات', style: TextStyle(fontFamily: 'Tajawal')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _universityController.dispose();
     _studentIdController.dispose();
     super.dispose();
   }
@@ -103,134 +254,111 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           centerTitle: true,
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // Name Fields Row
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomTextField(
-                        label: 'الاسم الأول',
-                        hint: 'الاسم الأول',
-                        controller: TextEditingController(text: 'فارس'),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      // Name Fields Row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CustomTextField(
+                              label: 'الاسم الأول',
+                              hint: 'الاسم الأول',
+                              controller: _firstNameController,
+                              validator: (v) => v!.isEmpty ? 'مطلوب' : null,
+                              labelAlignment: CrossAxisAlignment.start,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: CustomTextField(
+                              label: 'الاسم الأخير',
+                              hint: 'الاسم الأخير',
+                              controller: _lastNameController,
+                              validator: (v) => v!.isEmpty ? 'مطلوب' : null,
+                              labelAlignment: CrossAxisAlignment.start,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Email (read-only)
+                      CustomTextField(
+                        label: 'البريد الإلكتروني',
+                        hint: 'example@email.com',
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
                         validator: (v) => v!.isEmpty ? 'مطلوب' : null,
                         labelAlignment: CrossAxisAlignment.start,
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: CustomTextField(
-                        label: 'الاسم الأخير',
-                        hint: 'الاسم الأخير',
-                        controller: TextEditingController(text: 'المقبل'),
+                      const SizedBox(height: 16),
+
+                      // Phone
+                      CustomTextField(
+                        label: 'رقم الجوال',
+                        hint: '05xxxxxxxx',
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
                         validator: (v) => v!.isEmpty ? 'مطلوب' : null,
                         labelAlignment: CrossAxisAlignment.start,
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                      const SizedBox(height: 16),
 
-                // Email
-                CustomTextField(
-                  label: 'البريد الإلكتروني',
-                  hint: 'example@email.com',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) => v!.isEmpty ? 'مطلوب' : null,
-                  labelAlignment: CrossAxisAlignment.start,
-                ),
-                const SizedBox(height: 16),
+                      // City Dropdown
+                      _buildDropdownField(
+                        label: 'المدينة',
+                        value: _selectedCity,
+                        items: _cities,
+                        onChanged: (val) => setState(() => _selectedCity = val),
+                      ),
+                      const SizedBox(height: 16),
 
-                // Phone
-                CustomTextField(
-                  label: 'رقم الجوال',
-                  hint: '05xxxxxxxx',
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  validator: (v) => v!.isEmpty ? 'مطلوب' : null,
-                  labelAlignment: CrossAxisAlignment.start,
-                ),
-                const SizedBox(height: 16),
+                      // University Dropdown
+                      _buildDropdownField(
+                        label: 'الجامعة',
+                        value: _selectedUniversity,
+                        items: _universities,
+                        onChanged: (val) => setState(() => _selectedUniversity = val),
+                      ),
+                      const SizedBox(height: 16),
 
-                // City Dropdown
-                _buildDropdownField(
-                  label: 'المدينة',
-                  value: _selectedCity,
-                  items: _cities,
-                  onChanged: (val) => setState(() => _selectedCity = val),
-                ),
-                const SizedBox(height: 16),
+                      // College (dynamic from backend)
+                      _buildDropdownField(
+                        label: 'الكلية',
+                        value: _selectedCollege,
+                        items: _colleges,
+                        onChanged: (val) => setState(() => _selectedCollege = val),
+                      ),
+                      const SizedBox(height: 16),
 
-                // University
-                CustomTextField(
-                  label: 'الجامعة',
-                  hint: 'الجامعة',
-                  controller: _universityController,
-                  validator: (v) => v!.isEmpty ? 'مطلوب' : null,
-                  labelAlignment: CrossAxisAlignment.start,
-                ),
-                const SizedBox(height: 16),
+                      // Student ID
+                      CustomTextField(
+                        label: 'الرقم الجامعي',
+                        hint: 'الرقم الجامعي',
+                        controller: _studentIdController,
+                        validator: (v) => v!.isEmpty ? 'مطلوب' : null,
+                        labelAlignment: CrossAxisAlignment.start,
+                      ),
 
-                // College
-                _buildDropdownField(
-                  label: 'الكلية',
-                  value: _selectedCollege,
-                  items: _colleges,
-                  onChanged: (val) => setState(() => _selectedCollege = val),
-                ),
-                const SizedBox(height: 16),
+                      const SizedBox(height: 40),
 
-                // Student ID
-                CustomTextField(
-                  label: 'الرقم الجامعي',
-                  hint: 'الرقم الجامعي',
-                  controller: _studentIdController,
-                  validator: (v) => v!.isEmpty ? 'مطلوب' : null,
-                  labelAlignment: CrossAxisAlignment.start,
+                      // Update Button
+                      PrimaryButton(
+                        text: 'تعديل',
+                        isLoading: _isSaving,
+                        onPressed: _saveProfile,
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  ),
                 ),
-
-                const SizedBox(height: 40),
-
-                // Update Button
-                PrimaryButton(
-                  text: 'تعديل',
-                  onPressed: () {
-                    if (_selectedCollege == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'الرجاء اختيار الكلية',
-                            style: TextStyle(fontFamily: 'Tajawal'),
-                          ),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                      return;
-                    }
-                    if (_formKey.currentState!.validate()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'تم تحديث البيانات بنجاح',
-                            style: TextStyle(fontFamily: 'Tajawal'),
-                          ),
-                          backgroundColor: AppTheme.primaryColor,
-                        ),
-                      );
-                      context.pop();
-                    }
-                  },
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }

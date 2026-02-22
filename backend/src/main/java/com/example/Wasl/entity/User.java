@@ -52,6 +52,8 @@ public class User {
     @Column(name = "full_name")
     private String fullName;
 
+    private String city;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "selected_mode", nullable = false, length = 50)
     private UserMode selectedMode;

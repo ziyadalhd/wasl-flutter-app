@@ -1,5 +1,6 @@
 package com.example.Wasl.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,4 +10,5 @@ import com.example.Wasl.entity.College;
 
 @Repository
 public interface CollegeRepository extends JpaRepository<College, UUID> {
+    Optional<College> findByName(String name);
 }

@@ -79,6 +79,7 @@ public class AuthService implements UserDetailsService {
     @Transactional
     public String register(String email, String phone, String password, String fullName, UserMode mode,
             List<String> rolesWanted) {
+        email = email.toLowerCase().trim();
         if (userRepository.findByEmail(email).isPresent()) {
             throw new BusinessRuleException("Email already registered");
         }
@@ -119,6 +120,7 @@ public class AuthService implements UserDetailsService {
     }
 
     public String login(String email, String password) {
+        email = email.toLowerCase().trim();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 

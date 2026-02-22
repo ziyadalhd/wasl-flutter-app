@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wasl/core/models/models.dart';
+import 'package:wasl/core/services/api_client.dart';
+import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
+import 'package:wasl/features/student/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/manage_notifications_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/support_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/about_us_screen.dart';
+import 'package:wasl/features/student/profile/presentation/screens/terms_conditions_screen.dart';
 
 class StudentProfileScreen extends StatefulWidget {
   const StudentProfileScreen({super.key});
@@ -10,25 +18,98 @@ class StudentProfileScreen extends StatefulWidget {
 }
 
 class _StudentProfileScreenState extends State<StudentProfileScreen> {
-  // Mock state for verification. In a real app, this would come from a provider/bloc.
-  bool _isVerified = false;
+  MeResponse? _meResponse;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final me = await AuthService.getMe();
+      if (mounted) setState(() { _meResponse = me; _isLoading = false; });
+    } catch (e) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _logout() async {
+    await AuthService.logout();
+    if (mounted) context.go('/login');
+  }
+
+  Future<void> _switchToProvider() async {
+    try {
+      await AuthService.switchMode('PROVIDER');
+      if (mounted) context.go('/service-provider-home');
+    } on ApiException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.userMessage, style: const TextStyle(fontFamily: 'Tajawal')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          title: const Text('حذف الحساب', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
+          content: const Text('هل أنت متأكد من حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.',
+              style: TextStyle(fontFamily: 'Tajawal')),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('إلغاء', style: TextStyle(fontFamily: 'Tajawal')),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('حذف', style: TextStyle(fontFamily: 'Tajawal', color: Colors.red)),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed == true) {
+      try {
+        await AuthService.deleteAccount();
+        await AuthService.logout();
+        if (mounted) context.go('/login');
+      } on ApiException catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.userMessage, style: const TextStyle(fontFamily: 'Tajawal')),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final user = _meResponse?.user;
+    final displayName = user?.fullName ?? '...';
+    final displayEmail = user?.email ?? '...';
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFDFBF7), // Cream background
+        backgroundColor: AppTheme.backgroundColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFFDFBF7),
+          backgroundColor: AppTheme.backgroundColor,
           elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: AppTheme.textColor,
-            ),
-            onPressed: () => context.pop(),
-          ),
           title: const Text(
             'الملف الشخصي',
             style: TextStyle(
@@ -40,441 +121,232 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
           ),
           centerTitle: true,
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 16),
-              // 1. Header Section (Top Card)
-              _buildProfileHeader(),
-
-              const SizedBox(height: 24),
-
-              // 2. Main Menu List
-              _buildMenuItem(
-                icon: Icons.person_outline_rounded,
-                title: 'تعديل الملف الشخصي',
-                onTap: () {
-                  context.push('/student/profile/edit');
-                },
-              ),
-              _buildMenuItem(
-                icon: Icons.notifications_outlined,
-                title: 'إدارة الإشعارات',
-                onTap: () {
-                  context.push('/student/profile/notifications');
-                },
-              ),
-              _buildMenuItem(
-                icon: Icons.help_outline_rounded,
-                title: 'الدعم والمساعدة',
-                onTap: () {
-                  context.push('/student/profile/support');
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Switch to Service Provider
-              _buildSwitchRoleButton(context),
-
-              const SizedBox(height: 8),
-
-              _buildMenuItem(
-                icon: Icons.logout_rounded,
-                title: 'تسجيل الخروج',
-                textColor: Colors.red,
-                iconColor: Colors.red,
-                showArrow: false,
-                onTap: () {
-                  context.go('/login');
-                },
-              ),
-
-              const SizedBox(height: 8),
-
-              _buildMenuItem(
-                icon: Icons.delete_outline_rounded,
-                title: 'حذف الحساب',
-                textColor: Colors.grey,
-                iconColor: Colors.grey,
-                showArrow: false,
-                onTap: () {
-                  context.push(
-                    Uri(
-                      path: '/delete-account',
-                      queryParameters: {'role': 'student'},
-                    ).toString(),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 40),
-            ],
-          ),
-        ),
-        // 3. Bottom Navigation Bar
-        bottomNavigationBar: _buildBottomNavigationBar(context),
-      ),
-    );
-  }
-
-  Widget _buildProfileHeader() {
-    return Stack(
-      alignment: Alignment.topCenter,
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: AppTheme.primaryColor, // Dark Green
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 30, 20, 30),
-            child: Row(
-              // RTL: Start is Right.
-              children: [
-                // Avatar (Right side in RTL)
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.3),
-                      width: 2,
-                    ),
-                  ),
-                  child: const CircleAvatar(
-                    radius: 35,
-                    backgroundImage: NetworkImage(
-                      'https://i.pravatar.cc/150?img=11',
-                    ),
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                // Name and Info (Left of Avatar in RTL)
-                Expanded(
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
+            : RefreshIndicator(
+                onRefresh: _loadProfile,
+                color: AppTheme.primaryColor,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          const Text(
-                            'فارس المقبل',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Tajawal',
+                      // Profile Header Card
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          if (_isVerified)
-                            const Icon(
-                              Icons.verified,
-                              color: Colors.blueAccent,
-                              size: 20,
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // Verification Status / Action
-                      if (!_isVerified)
-                        InkWell(
-                          onTap: () async {
-                            // Build context push returns a future that completes when the pushed route is popped
-                            final result = await context.push(
-                              '/student/complete-profile',
-                            );
-                            if (result == true) {
-                              setState(() {
-                                _isVerified = true;
-                              });
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: Colors.orangeAccent.withValues(
-                                  alpha: 0.5,
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+                              child: Text(
+                                displayName.isNotEmpty ? displayName[0] : '?',
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryColor,
                                 ),
                               ),
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.info_outline_rounded,
-                                  color: Colors.orangeAccent,
-                                  size: 16,
-                                ),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  'وثق حسابك واكمل بياناتك',
-                                  style: TextStyle(
-                                    color: Colors.orangeAccent,
-                                    fontSize: 12,
-                                    fontFamily: 'Tajawal',
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                            const SizedBox(height: 12),
+                            Text(
+                              displayName,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Tajawal',
+                                color: AppTheme.textColor,
+                              ),
                             ),
-                          ),
-                        )
-                      else
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Text(
-                            'طالب',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontFamily: 'Tajawal',
-                              fontWeight: FontWeight.w500,
+                            const SizedBox(height: 4),
+                            Text(
+                              displayEmail,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontFamily: 'Tajawal',
+                                color: Colors.grey[600],
+                              ),
                             ),
-                          ),
-                        ),
-
-                      const SizedBox(height: 8),
-                      Text(
-                        'student@university.edu',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 14,
-                          fontFamily: 'Tajawal',
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text(
+                                'طالب',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: 'Tajawal',
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
+                      const SizedBox(height: 20),
+
+                      // Menu Items
+                      _buildMenuItem(
+                        icon: Icons.edit_outlined,
+                        title: 'تعديل الملف الشخصي',
+                        onTap: () async {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const EditProfileScreen()),
+                          );
+                          if (result == true) _loadProfile();
+                        },
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.notifications_outlined,
+                        title: 'إدارة الإشعارات',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const ManageNotificationsScreen()),
+                        ),
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.support_agent_outlined,
+                        title: 'الدعم الفني',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const SupportScreen()),
+                        ),
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.info_outline,
+                        title: 'عن التطبيق',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AboutUsScreen()),
+                        ),
+                      ),
+                      _buildMenuItem(
+                        icon: Icons.description_outlined,
+                        title: 'الشروط والأحكام',
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const TermsConditionsScreen()),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Switch to Provider
+                      _buildMenuItem(
+                        icon: Icons.swap_horiz,
+                        title: 'التبديل إلى مقدم خدمة',
+                        iconColor: Colors.green,
+                        onTap: _switchToProvider,
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // Logout
+                      _buildMenuItem(
+                        icon: Icons.logout,
+                        title: 'تسجيل الخروج',
+                        iconColor: Colors.orange,
+                        onTap: _logout,
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // Delete Account
+                      _buildMenuItem(
+                        icon: Icons.delete_outline,
+                        title: 'حذف الحساب',
+                        iconColor: Colors.red,
+                        textColor: Colors.red,
+                        onTap: _deleteAccount,
+                      ),
+
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
+              ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: 2,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: AppTheme.primaryColor,
+          unselectedItemColor: Colors.grey,
+          selectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
+          unselectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
+          onTap: (index) {
+            if (index == 0) context.go('/student-wallet');
+            if (index == 1) context.go('/chat');
+            if (index == 2) context.go('/student-home');
+            if (index == 3) context.go('/student-services');
+            if (index == 4) context.go('/student-bookings');
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), label: 'المحفظة'),
+            BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'المحادثات'),
+            BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'الرئيسية'),
+            BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: 'الخدمات'),
+            BottomNavigationBarItem(icon: Icon(Icons.bookmark_outline), label: 'الحجوزات'),
+          ],
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
-    VoidCallback? onTap,
-    Color textColor = AppTheme.textColor,
+    required VoidCallback onTap,
     Color iconColor = AppTheme.primaryColor,
-    bool showArrow = true,
+    Color textColor = AppTheme.textColor,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: ListTile(
-          onTap: onTap,
-          leading: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: iconColor, size: 22),
-          ),
-          title: Text(
-            title,
-            style: TextStyle(
-              color: textColor,
-              fontFamily: 'Tajawal',
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
-          ),
-          trailing: showArrow
-              ? const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: Colors.grey,
-                )
-              : null,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 4,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSwitchRoleButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF4DB6AC), Color(0xFF00796B)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF00796B).withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () {
-              // Navigation to Service Provider Home
-              context.go('/service_provider/home');
-            },
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.swap_horiz_rounded,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  const Expanded(
-                    child: Text(
-                      'التبديل لمنصة مقدم الخدمة',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Tajawal',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBottomNavigationBar(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: BottomNavigationBar(
-        currentIndex: 2, // Home is active
-        onTap: (index) {
-          if (index == 2) {
-            // Already in Home flow context, just pop to go back to Home Screen
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/student/home');
-            }
-          }
-          // Handle other nav items if needed
-        },
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        selectedItemColor: AppTheme.primaryColor,
-        unselectedItemColor: Colors.grey[400],
-        showUnselectedLabels: true,
-        selectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Tajawal',
-          fontSize: 12,
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: iconColor, size: 22),
         ),
-        unselectedLabelStyle: const TextStyle(
-          fontFamily: 'Tajawal',
-          fontSize: 12,
+        title: Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'Tajawal',
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
         ),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            activeIcon: Icon(Icons.account_balance_wallet),
-            label: 'محفظتي',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            activeIcon: Icon(Icons.chat_bubble),
-            label: 'محادثات',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home_filled),
-            label: 'الرئيسية',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view),
-            activeIcon: Icon(Icons.grid_view_rounded),
-            label: 'الخدمات',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today_outlined),
-            activeIcon: Icon(Icons.calendar_today),
-            label: 'حجوزاتي',
-          ),
-        ],
+        trailing: const Icon(Icons.arrow_back_ios, size: 16, color: Colors.grey),
+        onTap: onTap,
       ),
     );
   }

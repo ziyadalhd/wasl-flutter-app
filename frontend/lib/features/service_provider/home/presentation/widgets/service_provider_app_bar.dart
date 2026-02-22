@@ -1,11 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/service_provider/profile/presentation/screens/service_provider_profile_screen.dart';
 
-class ServiceProviderAppBar extends StatelessWidget
+class ServiceProviderAppBar extends StatefulWidget
     implements PreferredSizeWidget {
   const ServiceProviderAppBar({super.key});
+
+  @override
+  State<ServiceProviderAppBar> createState() => _ServiceProviderAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(80);
+}
+
+class _ServiceProviderAppBarState extends State<ServiceProviderAppBar> {
+  String _userName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    try {
+      final me = await AuthService.getMe();
+      if (mounted) {
+        setState(() => _userName = me.user.fullName);
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +46,14 @@ class ServiceProviderAppBar extends StatelessWidget
           children: [
             // Profile Info (Start - Right in RTL)
             GestureDetector(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const ServiceProviderProfileScreen(),
                   ),
                 );
+                _loadUserName();
               },
               child: Row(
                 children: [
@@ -42,10 +69,14 @@ class ServiceProviderAppBar extends StatelessWidget
                     child: CircleAvatar(
                       radius: 24,
                       backgroundColor: Colors.white,
-                      backgroundImage: NetworkImage(
-                        'https://i.pravatar.cc/150?img=12',
-                      ), // Different placeholder
-                      onBackgroundImageError: (_, __) {},
+                      child: Text(
+                        _userName.isNotEmpty ? _userName[0] : '',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -53,9 +84,9 @@ class ServiceProviderAppBar extends StatelessWidget
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'فارس المقبل',
-                        style: TextStyle(
+                      Text(
+                        _userName.isNotEmpty ? _userName : '...',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -64,7 +95,7 @@ class ServiceProviderAppBar extends StatelessWidget
                         ),
                       ),
                       Text(
-                        'مقدم خدمة', // Service Provider
+                        'مقدم خدمة',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 14,
@@ -100,7 +131,4 @@ class ServiceProviderAppBar extends StatelessWidget
       ),
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(80);
 }

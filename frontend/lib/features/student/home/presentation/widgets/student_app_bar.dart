@@ -1,34 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/student/profile/presentation/screens/student_profile_screen.dart';
 
-class StudentAppBar extends StatelessWidget implements PreferredSizeWidget {
+class StudentAppBar extends StatefulWidget implements PreferredSizeWidget {
   const StudentAppBar({super.key});
+
+  @override
+  State<StudentAppBar> createState() => _StudentAppBarState();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(80);
+}
+
+class _StudentAppBarState extends State<StudentAppBar> {
+  String _userName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    try {
+      final me = await AuthService.getMe();
+      if (mounted) {
+        setState(() => _userName = me.user.fullName);
+      }
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: AppTheme.primaryColor,
       toolbarHeight: 80,
-      automaticallyImplyLeading: false, // Remove back button if any
+      automaticallyImplyLeading: false,
       title: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: 12.0,
           vertical: 12.0,
-        ), // increased padding
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Profile Info (Start - Right in RTL)
             GestureDetector(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const StudentProfileScreen(),
                   ),
                 );
+                // Reload name when returning from profile (user may have edited it)
+                _loadUserName();
               },
               child: Row(
                 children: [
@@ -44,10 +72,14 @@ class StudentAppBar extends StatelessWidget implements PreferredSizeWidget {
                     child: CircleAvatar(
                       radius: 24,
                       backgroundColor: Colors.white,
-                      backgroundImage: NetworkImage(
-                        'https://i.pravatar.cc/150?img=11',
-                      ), // Placeholder
-                      onBackgroundImageError: (_, __) {},
+                      child: Text(
+                        _userName.isNotEmpty ? _userName[0] : '',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -55,9 +87,9 @@ class StudentAppBar extends StatelessWidget implements PreferredSizeWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'فارس المقبل',
-                        style: TextStyle(
+                      Text(
+                        _userName.isNotEmpty ? _userName : '...',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -84,13 +116,13 @@ class StudentAppBar extends StatelessWidget implements PreferredSizeWidget {
               decoration: BoxDecoration(
                 color: Colors.white.withValues(
                   alpha: 0.15,
-                ), // Slightly more transparent
-                borderRadius: BorderRadius.circular(14), // increased radius
+                ),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
               child: IconButton(
                 icon: const Icon(
-                  Icons.notifications_none_rounded, // rounded icon
+                  Icons.notifications_none_rounded,
                   color: Colors.white,
                   size: 26,
                 ),
@@ -104,7 +136,4 @@ class StudentAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(80);
 }

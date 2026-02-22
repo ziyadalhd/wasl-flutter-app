@@ -37,6 +37,9 @@ public class StudentProfile {
     @Column(name = "university_id")
     private String universityId;
 
+    @Column(name = "university_name")
+    private String universityName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "college_id")
     private College college;

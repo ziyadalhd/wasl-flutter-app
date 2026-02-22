@@ -52,10 +52,30 @@ class AuthService {
     return MeResponse.fromJson(json);
   }
 
+  /// `PUT /api/me/profile` → updates profile → returns updated [MeResponse].
+  static Future<MeResponse> updateProfile(Map<String, dynamic> data) async {
+    final json = await ApiClient.put('/api/me/profile', body: data);
+    return MeResponse.fromJson(json);
+  }
+
+  /// `DELETE /api/me` → soft-deletes account.
+  static Future<void> deleteAccount() async {
+    await ApiClient.delete('/api/me');
+  }
+
   /// `PUT /api/me/mode` → switches active mode.
   static Future<void> switchMode(String mode) async {
     final body = SwitchModeRequest(mode: mode).toJson();
     await ApiClient.put('/api/me/mode', body: body);
+  }
+
+  /// `GET /api/colleges` → returns list of college maps.
+  static Future<List<Map<String, dynamic>>> getColleges() async {
+    final json = await ApiClient.get('/api/colleges', auth: false);
+    final list = json['data'] as List<dynamic>;
+    return list
+        .map((e) => e as Map<String, dynamic>)
+        .toList();
   }
 
   // ── Home Feed ────────────────────────────────────────────────────────────

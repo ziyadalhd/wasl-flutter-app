@@ -55,6 +55,7 @@ class UserDTO {
   final String email;
   final String? phone;
   final String fullName;
+  final String? city;
   final String selectedMode;
   final String status;
   final List<String> roles;
@@ -64,6 +65,7 @@ class UserDTO {
     required this.email,
     this.phone,
     required this.fullName,
+    this.city,
     required this.selectedMode,
     required this.status,
     required this.roles,
@@ -74,6 +76,7 @@ class UserDTO {
         email: json['email'] as String,
         phone: json['phone'] as String?,
         fullName: json['fullName'] as String,
+        city: json['city'] as String?,
         selectedMode: json['selectedMode'] as String,
         status: json['status'] as String,
         roles: (json['roles'] as List<dynamic>).cast<String>(),
@@ -82,13 +85,15 @@ class UserDTO {
 
 class StudentProfileDTO {
   final String? universityId;
+  final String? universityName;
   final String? collegeName;
 
-  const StudentProfileDTO({this.universityId, this.collegeName});
+  const StudentProfileDTO({this.universityId, this.universityName, this.collegeName});
 
   factory StudentProfileDTO.fromJson(Map<String, dynamic> json) =>
       StudentProfileDTO(
         universityId: json['universityId'] as String?,
+        universityName: json['universityName'] as String?,
         collegeName: json['collegeName'] as String?,
       );
 }

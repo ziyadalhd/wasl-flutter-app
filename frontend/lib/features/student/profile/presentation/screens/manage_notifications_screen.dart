@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 
 class ManageNotificationsScreen extends StatefulWidget {
@@ -11,13 +12,47 @@ class ManageNotificationsScreen extends StatefulWidget {
 }
 
 class _ManageNotificationsScreenState extends State<ManageNotificationsScreen> {
-  // Local state for toggles
+  // Keys for SharedPreferences
+  static const _keyAccount = 'notif_student_account';
+  static const _keyService = 'notif_student_service';
+  static const _keyPayment = 'notif_student_payment';
+  static const _keyGeneral = 'notif_student_general';
+  static const _keySecurity = 'notif_student_security';
+  static const _keyApp = 'notif_student_app';
+
   bool _accountNotifications = true;
   bool _serviceNotifications = true;
   bool _paymentNotifications = true;
   bool _generalAnnouncements = true;
   bool _securityAlerts = true;
   bool _appAlerts = true;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _accountNotifications = prefs.getBool(_keyAccount) ?? true;
+        _serviceNotifications = prefs.getBool(_keyService) ?? true;
+        _paymentNotifications = prefs.getBool(_keyPayment) ?? true;
+        _generalAnnouncements = prefs.getBool(_keyGeneral) ?? true;
+        _securityAlerts = prefs.getBool(_keySecurity) ?? true;
+        _appAlerts = prefs.getBool(_keyApp) ?? true;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _savePreference(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,46 +96,66 @@ class _ManageNotificationsScreenState extends State<ManageNotificationsScreen> {
           ),
           centerTitle: true,
         ),
-        body: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            _buildNotificationTile(
-              title: 'إشعارات الحساب',
-              value: _accountNotifications,
-              onChanged: (val) => setState(() => _accountNotifications = val),
-            ),
-            const SizedBox(height: 16),
-            _buildNotificationTile(
-              title: 'إشعارات الخدمات',
-              value: _serviceNotifications,
-              onChanged: (val) => setState(() => _serviceNotifications = val),
-            ),
-            const SizedBox(height: 16),
-            _buildNotificationTile(
-              title: 'إشعارات الدفع',
-              value: _paymentNotifications,
-              onChanged: (val) => setState(() => _paymentNotifications = val),
-            ),
-            const SizedBox(height: 16),
-            _buildNotificationTile(
-              title: 'إعلانات عامة',
-              value: _generalAnnouncements,
-              onChanged: (val) => setState(() => _generalAnnouncements = val),
-            ),
-            const SizedBox(height: 16),
-            _buildNotificationTile(
-              title: 'إشعارات الأمان',
-              value: _securityAlerts,
-              onChanged: (val) => setState(() => _securityAlerts = val),
-            ),
-            const SizedBox(height: 16),
-            _buildNotificationTile(
-              title: 'تنبيهات التطبيق',
-              value: _appAlerts,
-              onChanged: (val) => setState(() => _appAlerts = val),
-            ),
-          ],
-        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor))
+            : ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  _buildNotificationTile(
+                    title: 'إشعارات الحساب',
+                    value: _accountNotifications,
+                    onChanged: (val) {
+                      setState(() => _accountNotifications = val);
+                      _savePreference(_keyAccount, val);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildNotificationTile(
+                    title: 'إشعارات الخدمات',
+                    value: _serviceNotifications,
+                    onChanged: (val) {
+                      setState(() => _serviceNotifications = val);
+                      _savePreference(_keyService, val);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildNotificationTile(
+                    title: 'إشعارات الدفع',
+                    value: _paymentNotifications,
+                    onChanged: (val) {
+                      setState(() => _paymentNotifications = val);
+                      _savePreference(_keyPayment, val);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildNotificationTile(
+                    title: 'إعلانات عامة',
+                    value: _generalAnnouncements,
+                    onChanged: (val) {
+                      setState(() => _generalAnnouncements = val);
+                      _savePreference(_keyGeneral, val);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildNotificationTile(
+                    title: 'إشعارات الأمان',
+                    value: _securityAlerts,
+                    onChanged: (val) {
+                      setState(() => _securityAlerts = val);
+                      _savePreference(_keySecurity, val);
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildNotificationTile(
+                    title: 'تنبيهات التطبيق',
+                    value: _appAlerts,
+                    onChanged: (val) {
+                      setState(() => _appAlerts = val);
+                      _savePreference(_keyApp, val);
+                    },
+                  ),
+                ],
+              ),
       ),
     );
   }
@@ -112,13 +167,12 @@ class _ManageNotificationsScreenState extends State<ManageNotificationsScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF268E82), // Teal color from screenshot
+        color: const Color(0xFF268E82),
         borderRadius: BorderRadius.circular(16),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          // Icon (Right in RTL)
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -131,10 +185,7 @@ class _ManageNotificationsScreenState extends State<ManageNotificationsScreen> {
               size: 20,
             ),
           ),
-
           const SizedBox(width: 16),
-
-          // Text
           Expanded(
             child: Text(
               title,
@@ -147,17 +198,14 @@ class _ManageNotificationsScreenState extends State<ManageNotificationsScreen> {
               ),
             ),
           ),
-
           const SizedBox(width: 8),
-
-          // Switch (Left in RTL)
           Transform.scale(
             scale: 0.8,
             child: Switch(
               value: value,
               onChanged: onChanged,
               activeColor: Colors.white,
-              activeTrackColor: const Color(0xFF80CBC4), // Lighter teal
+              activeTrackColor: const Color(0xFF80CBC4),
               inactiveThumbColor: Colors.white,
               inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
               trackOutlineColor: WidgetStateProperty.all(Colors.transparent),

@@ -9,11 +9,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.Wasl.dto.ProfileCompletionDTO;
+import com.example.Wasl.dto.UpdateProfileRequest;
+import com.example.Wasl.entity.College;
 import com.example.Wasl.entity.ProviderProfile;
 import com.example.Wasl.entity.StudentProfile;
 import com.example.Wasl.entity.User;
 import com.example.Wasl.entity.enums.UserMode;
+import com.example.Wasl.entity.enums.UserStatus;
 import com.example.Wasl.entity.enums.VerificationStatus;
+import com.example.Wasl.repository.CollegeRepository;
 import com.example.Wasl.repository.ProviderProfileRepository;
 import com.example.Wasl.repository.UserRepository;
 
@@ -25,6 +29,7 @@ public class ProfileService {
 
     private final UserRepository userRepository;
     private final ProviderProfileRepository providerProfileRepository;
+    private final CollegeRepository collegeRepository;
 
     @Transactional(readOnly = true)
     public User getProfile(UUID userId, UserMode mode) {
@@ -34,6 +39,60 @@ public class ProfileService {
         }
         return userRepository.findByIdWithProviderProfileAndDocuments(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    @Transactional
+    public User updateProfile(UUID userId, UpdateProfileRequest request) {
+        // First get the user to determine mode
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        UserMode mode = user.getSelectedMode();
+
+        // Re-fetch with the appropriate profile loaded
+        user = getProfile(userId, mode);
+
+        // Update shared fields
+        user.setFullName(request.getFullName());
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getCity() != null) {
+            user.setCity(request.getCity());
+        }
+
+        // Update mode-specific fields
+        if (mode == UserMode.STUDENT) {
+            StudentProfile profile = user.getStudentProfile();
+            if (profile != null) {
+                if (request.getUniversityId() != null) {
+                    profile.setUniversityId(request.getUniversityId());
+                }
+                if (request.getUniversityName() != null) {
+                    profile.setUniversityName(request.getUniversityName());
+                }
+                if (request.getCollegeName() != null) {
+                    College college = collegeRepository.findByName(request.getCollegeName())
+                            .orElse(null);
+                    profile.setCollege(college);
+                }
+            }
+        } else if (mode == UserMode.PROVIDER) {
+            ProviderProfile profile = user.getProviderProfile();
+            if (profile != null && request.getBio() != null) {
+                profile.setBio(request.getBio());
+            }
+        }
+
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteAccount(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setStatus(UserStatus.DELETED);
+        userRepository.save(user);
     }
 
     public ProfileCompletionDTO calculateCompletion(User user, UserMode mode) {

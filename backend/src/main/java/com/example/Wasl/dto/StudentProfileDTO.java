@@ -13,5 +13,6 @@ import lombok.Setter;
 @Builder
 public class StudentProfileDTO implements ProfileDTO {
     private String universityId;
+    private String universityName;
     private String collegeName;
 }

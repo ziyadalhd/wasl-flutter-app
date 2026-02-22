@@ -19,6 +19,7 @@ public class UserDTO {
     private String email;
     private String phone;
     private String fullName;
+    private String city;
     private String selectedMode;
     private String status;
     private List<String> roles;
