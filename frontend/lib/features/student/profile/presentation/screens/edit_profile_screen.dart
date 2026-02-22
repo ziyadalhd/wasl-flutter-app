@@ -390,8 +390,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value,
+            child: DropdownButtonFormField<String>( // Changed to DropdownButtonFormField to support validation
+              autovalidateMode: AutovalidateMode.onUserInteraction, // Added here
+              initialValue: value,
               isExpanded: true,
               icon: const Icon(
                 Icons.keyboard_arrow_down_rounded,

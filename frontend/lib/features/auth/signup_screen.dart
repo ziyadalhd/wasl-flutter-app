@@ -52,6 +52,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   // State for selections
   DateTime? _selectedDate;
   String? _selectedGender;
+  bool _submitted = false; // Add this to track submission
 
   @override
   void dispose() {
@@ -89,6 +90,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _submit() {
+    setState(() {
+      _submitted = true;
+    });
+
     // 1.g: One or more mandatory fields are empty -> "Please fill all required fields."
     // We check this by validating the form. If form is invalid because of empty fields, we show the message.
     bool formValid = _formKey.currentState?.validate() ?? false;
@@ -96,7 +101,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     // Check Date and Gender
     bool dateValid = _selectedDate != null;
     bool genderValid = _selectedGender != null;
-
+    
+    // ... rest of validation logic matches original structure ...
     if (!formValid || !dateValid || !genderValid) {
       String errorMessage = 'الرجاء تعبئة جميع الحقول المطلوبة.';
 
@@ -182,6 +188,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
           child: Form(
             key: _formKey,
+            // autovalidateMode: AutovalidateMode.onUserInteraction, // Removed to prevent global validation
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -194,6 +201,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     color: Colors.black87,
                   ),
                 ),
+                
                 const SizedBox(height: 8),
                 Align(
                   alignment: Alignment.centerRight,
@@ -263,7 +271,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                           ),
                           const SizedBox(height: 8),
-                          InkWell(
+                            InkWell(
                             onTap: _pickDate,
                             borderRadius: BorderRadius.circular(16),
                             child: Container(
@@ -275,11 +283,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color:
-                                      (_selectedDate == null &&
-                                          _formKey.currentState != null &&
-                                          _formKey.currentState!.validate() ==
-                                              false)
+                                  color: (_submitted && _selectedDate == null)
                                       ? Colors.red.withValues(alpha: 0.5)
                                       : Colors.grey.withValues(alpha: 0.1),
                                 ),
@@ -334,7 +338,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: Colors.grey.withValues(alpha: 0.1),
+                                color: (_submitted && _selectedGender == null)
+                                    ? Colors.red.withValues(alpha: 0.5) // Show red if submitted & empty
+                                    : Colors.grey.withValues(alpha: 0.1),
                               ),
                             ),
                             child: Row(
@@ -393,7 +399,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: _selectedCity,
+                  autovalidateMode: AutovalidateMode.onUserInteraction, // Added here
+                  initialValue: _selectedCity,
                   items: _saudiCities.map((city) {
                     return DropdownMenuItem(value: city, child: Text(city));
                   }).toList(),
