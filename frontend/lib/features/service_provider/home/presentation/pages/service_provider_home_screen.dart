@@ -8,6 +8,7 @@ import 'package:wasl/features/service_provider/home/presentation/widgets/dashboa
 import 'package:wasl/features/service_provider/home/presentation/widgets/impact_banner.dart';
 import 'package:wasl/features/wallet/presentation/screens/provider_wallet_screen.dart';
 import 'package:wasl/features/chat/presentation/screens/chat_list_screen.dart';
+import 'package:wasl/features/service_provider/services/presentation/pages/provider_services_screen.dart';
 
 class ServiceProviderHomeScreen extends StatefulWidget {
   const ServiceProviderHomeScreen({super.key});
@@ -24,7 +25,7 @@ class _ServiceProviderHomeScreenState extends State<ServiceProviderHomeScreen> {
     const ProviderWalletScreen(),
     const ChatListScreen(),
     const _ServiceProviderHomeBody(),
-    const Center(child: Text('الخدمات')), // Placeholder
+    const ProviderServicesScreen(),
     const Center(child: Text('لوحة المعلومات')), // Placeholder
   ];
 
