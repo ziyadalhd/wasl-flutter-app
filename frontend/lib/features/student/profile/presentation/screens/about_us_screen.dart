@@ -174,7 +174,7 @@ class AboutUsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'من احدى شركات الوادي',
+                    'من أم القرى.. لكل القرى',
                     style: GoogleFonts.tajawal(
                       fontSize: 14,
                       color: Colors.grey,

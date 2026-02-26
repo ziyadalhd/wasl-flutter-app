@@ -5,6 +5,7 @@ import 'package:wasl/core/components/primary_button.dart';
 import 'package:wasl/core/services/api_client.dart';
 import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
+import '../admin/presentation/pages/admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -201,6 +202,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       context,
                     ).textTheme.bodySmall?.copyWith(height: 1.6),
                   ),
+                ),
+                
+                const SizedBox(height: 24),
+                // Temporary Admin Button
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminDashboardScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text('Admin (مؤقت)', style: TextStyle(color: Colors.red)),
                 ),
               ],
             ),

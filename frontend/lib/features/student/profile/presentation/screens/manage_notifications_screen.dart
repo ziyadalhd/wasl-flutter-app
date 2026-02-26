@@ -204,7 +204,7 @@ class _ManageNotificationsScreenState extends State<ManageNotificationsScreen> {
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: Colors.white,
+              activeThumbColor: Colors.white,
               activeTrackColor: const Color(0xFF80CBC4),
               inactiveThumbColor: Colors.white,
               inactiveTrackColor: Colors.white.withValues(alpha: 0.3),
