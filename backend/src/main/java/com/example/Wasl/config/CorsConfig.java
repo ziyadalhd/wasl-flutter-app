@@ -30,8 +30,11 @@ public class CorsConfig {
             configuration.setAllowedOriginPatterns(sanitized);
         }
 
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        // ✅ تم إضافة PATCH هنا للسماح لزر التبديل بالعمل
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        
+        // ✅ تم إضافة Accept هنا لأن تطبيق Flutter الخاص بك يرسله في الـ Headers
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

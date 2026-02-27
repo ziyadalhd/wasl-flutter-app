@@ -43,7 +43,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
 
   Future<void> _switchToProvider() async {
     try {
-      await AuthService.switchMode('PROVIDER');
+      await AuthService.switchMode();
       if (mounted) context.go('/service-provider-home');
     } on ApiException catch (e) {
       if (mounted) {

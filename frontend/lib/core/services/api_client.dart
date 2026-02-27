@@ -107,6 +107,26 @@ class ApiClient {
     }
   }
 
+  /// Sends a **PATCH** request with an optional JSON [body].
+  // ✅ تمت إضافة دالة PATCH هنا لحل الخطأ
+  static Future<Map<String, dynamic>> patch(
+    String path, {
+    Map<String, dynamic>? body,
+    bool auth = true,
+  }) async {
+    final uri = Uri.parse('$baseUrl$path');
+    try {
+      final response = await http.patch(
+        uri,
+        headers: await _headers(auth: auth),
+        body: body != null ? jsonEncode(body) : null,
+      );
+      return _handleResponse(response);
+    } catch (e) {
+      throw _wrapConnectionError(e);
+    }
+  }
+
   /// Sends a **DELETE** request.
   static Future<Map<String, dynamic>> delete(
     String path, {
@@ -143,7 +163,7 @@ class ApiClient {
     ApiErrorResponse? apiError;
     try {
       apiError = ApiErrorResponse.fromJson(
-          jsonDecode(response.body) as Map<String, dynamic>);
+          jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>);
     } catch (_) {
       // ignore parse failures
     }
@@ -180,14 +200,21 @@ class ApiException implements Exception {
 
   /// Returns an Arabic user-facing message based on the status code.
   String get userMessage {
+    // ✅ الأولوية للرسالة القادمة من السيرفر إذا كانت موجودة، هذا يحل مشكلة الإيميل/الجوال
+    if (apiError?.message != null && apiError!.message!.isNotEmpty) {
+      return apiError!.message!;
+    }
+
+    // إذا لم يرسل السيرفر رسالة مخصصة، نستخدم هذه الرسائل الافتراضية
     if (statusCode == 0) return 'تعذر الاتصال بالسيرفر. تأكد من تشغيل الخادم واتصالك بالإنترنت.';
     if (statusCode == 401) return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
     if (statusCode == 403) return 'ليس لديك صلاحية للوصول.';
-    if (statusCode == 404) return 'الحساب غير موجود.';
-    if (statusCode == 409) return 'البريد الإلكتروني مسجل مسبقاً.';
+    if (statusCode == 404) return 'الحساب غير موجود أو الرابط خاطئ.';
+    if (statusCode == 409) return 'حدث تعارض في البيانات (مستخدم مسبقاً).';
     if (statusCode == 422) return 'بيانات غير صالحة. الرجاء المحاولة مرة أخرى.';
     if (statusCode >= 500) return 'خطأ في السيرفر. الرجاء المحاولة لاحقاً.';
-    return apiError?.message ?? 'حدث خطأ غير متوقع. ($statusCode)';
+    
+    return 'حدث خطأ غير متوقع. ($statusCode)';
   }
 
   String get message =>

@@ -18,7 +18,7 @@ class RegisterRequest {
   final String password;
   final String fullName;
   final String mode; // "STUDENT" | "PROVIDER"
-  final List<String> rolesWanted;
+  // ❌ تم حذف rolesWanted
 
   const RegisterRequest({
     required this.email,
@@ -26,26 +26,30 @@ class RegisterRequest {
     required this.password,
     required this.fullName,
     required this.mode,
-    required this.rolesWanted,
   });
 
   Map<String, dynamic> toJson() => {
         'email': email,
-        'phone': phone,
+        if (phone != null) 'phone': phone,
         'password': password,
         'fullName': fullName,
         'mode': mode,
-        'rolesWanted': rolesWanted,
       };
 }
 
 class AuthResponse {
   final String token;
+  final String selectedMode; // ✅ تمت إضافة selectedMode حسب تحديثات الباك إند
 
-  const AuthResponse({required this.token});
+  const AuthResponse({
+    required this.token,
+    required this.selectedMode,
+  });
 
-  factory AuthResponse.fromJson(Map<String, dynamic> json) =>
-      AuthResponse(token: json['token'] as String);
+  factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
+        token: json['token'] as String,
+        selectedMode: json['selectedMode'] as String? ?? 'STUDENT', // قيمة افتراضية للحماية
+      );
 }
 
 // ─── Me / Profile ────────────────────────────────────────────────────────────
@@ -152,7 +156,7 @@ class MeResponse {
   });
 
   factory MeResponse.fromJson(Map<String, dynamic> json) {
-    final mode = json['mode'] as String;
+    final mode = json['mode'] as String? ?? json['user']['selectedMode'] as String;
     final profileJson = json['profile'] as Map<String, dynamic>?;
     dynamic profile;
     if (profileJson != null) {
@@ -170,13 +174,7 @@ class MeResponse {
   }
 }
 
-class SwitchModeRequest {
-  final String mode;
-
-  const SwitchModeRequest({required this.mode});
-
-  Map<String, dynamic> toJson() => {'mode': mode};
-}
+// ❌ تم حذف كلاس SwitchModeRequest لأنه لم يعد له حاجة
 
 // ─── Home Feed ───────────────────────────────────────────────────────────────
 

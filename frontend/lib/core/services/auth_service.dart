@@ -27,7 +27,7 @@ class AuthService {
     required String password,
     required String fullName,
     required String mode,
-    required List<String> rolesWanted,
+    // ❌ تم حذف rolesWanted من هنا ليتوافق مع الباك إند
   }) async {
     final body = RegisterRequest(
       email: email,
@@ -35,10 +35,9 @@ class AuthService {
       password: password,
       fullName: fullName,
       mode: mode,
-      rolesWanted: rolesWanted,
+      // ❌ تم حذف rolesWanted من الـ Payload
     ).toJson();
-    final json =
-        await ApiClient.post('/api/auth/register', body: body, auth: false);
+    final json = await ApiClient.post('/api/auth/register', body: body, auth: false);
     final authResponse = AuthResponse.fromJson(json);
     await ApiClient.saveToken(authResponse.token);
     return authResponse;
@@ -58,15 +57,23 @@ class AuthService {
     return MeResponse.fromJson(json);
   }
 
-  /// `DELETE /api/me` → soft-deletes account.
+  /// `DELETE /api/me` → hard-deletes account if rules allow.
   static Future<void> deleteAccount() async {
+    // تأكد أن الرابط في الباك إند هو هذا، بعض المبرمجين يجعله /api/users/me
     await ApiClient.delete('/api/me');
   }
 
-  /// `PUT /api/me/mode` → switches active mode.
-  static Future<void> switchMode(String mode) async {
-    final body = SwitchModeRequest(mode: mode).toJson();
-    await ApiClient.put('/api/me/mode', body: body);
+  /// `PATCH /api/users/switch-mode` → auto-toggles mode → saves new JWT.
+  static Future<void> switchMode() async {
+    // ✅ 1. الرابط الجديد ونوع الطلب (PATCH) ولا نحتاج لإرسال Body
+    // ملاحظة: تأكد أن ملف ApiClient يدعم دالة patch()، إذا لم تكن موجودة أضفها.
+    final json = await ApiClient.patch('/api/users/switch-mode');
+    
+    // ✅ 2. استلام الرد الجديد الذي يحتوي على التوكن المحدث
+    final authResponse = AuthResponse.fromJson(json);
+    
+    // ✅ 3. حفظ التوكن الجديد (هذا ما كان ينقصك لتجنب الـ 403 Forbidden)
+    await ApiClient.saveToken(authResponse.token);
   }
 
   /// `GET /api/colleges` → returns list of college maps.

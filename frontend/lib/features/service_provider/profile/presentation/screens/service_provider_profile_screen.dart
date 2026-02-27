@@ -44,7 +44,7 @@ class _ServiceProviderProfileScreenState
 
   Future<void> _switchToStudent() async {
     try {
-      await AuthService.switchMode('STUDENT');
+      await AuthService.switchMode();
       if (mounted) context.go('/student-home');
     } on ApiException catch (e) {
       if (mounted) {

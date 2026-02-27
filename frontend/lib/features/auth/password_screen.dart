@@ -83,7 +83,6 @@ class _PasswordScreenState extends State<PasswordScreen> {
         password: password,
         fullName: fullName,
         mode: mode,
-        rolesWanted: rolesWanted,
       );
 
       if (!mounted) return;
