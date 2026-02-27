@@ -8,6 +8,8 @@ class ProviderServiceCard extends StatelessWidget {
   final String price;
   final double rating;
   final List<String> features;
+  final String? origin; // Added for route
+  final String? destination; // Added for route
 
   const ProviderServiceCard({
     super.key,
@@ -17,6 +19,8 @@ class ProviderServiceCard extends StatelessWidget {
     required this.price,
     required this.rating,
     required this.features,
+    this.origin,
+    this.destination,
   });
 
   @override
@@ -145,32 +149,95 @@ class ProviderServiceCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  // Features - Wrap Chips
-                  Wrap(
-                    spacing: 6.0,
-                    runSpacing: 6.0,
-                    children: features.map((feature) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
+                  // Conditional Render: Route Bar OR Features Chips
+                  if (origin != null && destination != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
                           color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
-                          feature,
-                          style: const TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.my_location_rounded, // Origin Dot
+                            size: 14,
                             color: AppTheme.primaryColor,
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              origin!,
+                              style: const TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Icon(
+                              Icons.arrow_back_rounded, // RTL Arrow
+                              size: 14,
+                              color: AppTheme.subtitleColor,
+                            ),
+                          ),
+                          const Icon(
+                            Icons.location_on_rounded, // Destination Pin
+                            size: 14,
+                            color: AppTheme.errorColor, // Highlight destination
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              destination!,
+                              style: const TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.textColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Wrap(
+                      spacing: 6.0,
+                      runSpacing: 6.0,
+                      children: features.map((feature) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            feature,
+                            style: const TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
                 ],
               ),
             ),

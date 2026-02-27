@@ -35,7 +35,7 @@ class CustomDropdownField<T> extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<T>(
-          value: value, // keeping value here because initialValue is for form field but this behaves better dynamically for state
+          initialValue: value, // keeping value here because initialValue is for form field but this behaves better dynamically for state
           items: items,
           onChanged: onChanged,
           icon: const Icon(Icons.keyboard_arrow_down_rounded),

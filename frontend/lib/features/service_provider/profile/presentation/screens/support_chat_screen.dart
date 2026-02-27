@@ -69,7 +69,7 @@ class ServiceProviderSupportChatScreen extends StatelessWidget {
                 children: [
                   _buildMessageBubble(
                     message:
-                        'اهلا بك في الدعم الفني لتطبيق وصل\nمعك سارة مامور الشكاوي ومقدمي الخدمة',
+                        'اهلا بك في الدعم الفني لتطبيق وصل\nمعك سارة مختصة الشكاوي ومقدمي الخدمة',
                     isMe: false,
                   ),
                   _buildMessageBubble(
@@ -83,7 +83,7 @@ class ServiceProviderSupportChatScreen extends StatelessWidget {
                     isMe: false,
                   ),
                   _buildMessageBubble(
-                    message: 'تحدث الغريب ان يشارِك العهد وما يطولنا',
+                    message: 'شكرا لك..',
                     isMe: true,
                   ),
                 ],

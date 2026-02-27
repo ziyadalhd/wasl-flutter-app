@@ -5,7 +5,7 @@ import 'package:wasl/features/student/home/presentation/widgets/section_header.d
 import 'package:wasl/features/student/home/presentation/widgets/listing_card.dart';
 import 'package:wasl/features/student/home/presentation/widgets/promo_banner.dart';
 import 'package:wasl/features/wallet/presentation/screens/student_wallet_screen.dart';
-import 'package:wasl/features/chat/presentation/screens/chat_list_screen.dart';
+import 'package:wasl/features/student/chat/presentation/screens/student_chat_list_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -20,7 +20,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   // Screens for each tab
   final List<Widget> _screens = [
     const StudentWalletScreen(),
-    const ChatListScreen(),
+    const StudentChatListScreen(),
     const _StudentHomeBody(),
     const Center(child: Text('الخدمات')), // Placeholder
     const Center(child: Text('حجوزاتي')), // Placeholder

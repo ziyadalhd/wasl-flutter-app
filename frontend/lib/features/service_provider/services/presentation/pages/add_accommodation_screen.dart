@@ -18,13 +18,18 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
   final _locationController = TextEditingController(); // acts as mock picker
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  final _capacityController = TextEditingController();
+  final _dateRangeController = TextEditingController(); // For displaying selected date
 
   // Dropdown values
   String? _selectedAccommodationType;
   int? _selectedRooms;
   int? _selectedBathrooms;
   int? _selectedFacilities;
+  String? _selectedCapacity; // Changed from controller to dropdown value
+
+  // Subscription state
+  String? _selectedDuration;
+  DateTimeRange? _selectedDateRange;
 
   @override
   void dispose() {
@@ -32,14 +37,56 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
     _locationController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
-    _capacityController.dispose();
+    _dateRangeController.dispose();
     super.dispose();
   }
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      if (_selectedDuration == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('الرجاء اختيار مدة الاشتراك',
+                style: TextStyle(fontFamily: 'Tajawal')),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+        return;
+      }
+      if (_selectedDateRange == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('الرجاء تحديد تاريخ الاشتراك',
+                style: TextStyle(fontFamily: 'Tajawal')),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+        return;
+      }
+      
       // Form is fully valid
       _showSuccessDialog();
+    }
+  }
+
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+      builder: (context, child) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDateRange = picked;
+        _dateRangeController.text =
+            '${picked.start.year}/${picked.start.month}/${picked.start.day} - ${picked.end.year}/${picked.end.month}/${picked.end.day}';
+      });
     }
   }
 
@@ -187,50 +234,8 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                         ),
                         _buildSpacing(),
 
-                        // Attachments (Container acting as button)
-                        const Text(
-                          'المرفقات',
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.textColor,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        InkWell(
-                          onTap: () {
-                            // TODO: Add file picker logic
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Ink(
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: AppTheme.inputFillColor,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.grey.withValues(alpha: 0.2),
-                              ),
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.cloud_upload_outlined,
-                                    color: AppTheme.primaryColor),
-                                SizedBox(width: 8),
-                                Text(
-                                  'اضغط لرفع الصور (حد أقصى 10-20 MB)',
-                                  style: TextStyle(
-                                    fontFamily: 'Tajawal',
-                                    fontSize: 12,
-                                    color: AppTheme.subtitleColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        _buildSpacing(),
+                        // Old attachments location removed.
+
 
                         // Rooms & Facilities Multi-column Row
                         const Text(
@@ -290,38 +295,179 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                         ),
                         _buildSpacing(),
 
-                        // Price and Capacity Row
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: CustomTextFormField(
-                                labelText: 'السعر',
-                                hintText: '0',
-                                controller: _priceController,
-                                keyboardType: TextInputType.number,
-                                suffixIcon: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Image.asset(
-                                    'assets/icons/Saudi_Riyal_Symbol.svg.png',
-                                    height: 20,
-                                    width: 20,
-                                    color: AppTheme.subtitleColor,
-                                  ),
+                        // Capacity Dropdown (Moved out of Price row)
+                        CustomDropdownField<String>(
+                          labelText: 'السعة',
+                          hintText: 'اختر السعة',
+                          value: _selectedCapacity,
+                          items: const [
+                            DropdownMenuItem(value: '1', child: Text('1 أفراد')),
+                            DropdownMenuItem(value: '2', child: Text('2 أفراد')),
+                            DropdownMenuItem(value: '3', child: Text('3 أفراد')),
+                            DropdownMenuItem(value: '4', child: Text('4 أفراد')),
+                          ],
+                          onChanged: (val) => setState(() => _selectedCapacity = val),
+                        ),
+                        _buildSpacing(),
+
+                        // Subscription Duration Section
+                        const Text(
+                          'مدة الاشتراك',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: ['شهري', 'ترم', 'سنة دراسية'].map((duration) {
+                            final isSelected = _selectedDuration == duration;
+                            return ChoiceChip(
+                              label: Text(duration),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() {
+                                    _selectedDuration = duration;
+                                  });
+                                }
+                              },
+                              labelStyle: TextStyle(
+                                fontFamily: 'Tajawal',
+                                color: isSelected ? Colors.white : AppTheme.textColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              selectedColor: AppTheme.primaryColor,
+                              backgroundColor: AppTheme.inputFillColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: BorderSide(
+                                  color: isSelected
+                                      ? AppTheme.primaryColor
+                                      : Colors.grey.withValues(alpha: 0.2),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        _buildSpacing(),
+
+                        // Dynamic UI based on Subscription Selection
+                        if (_selectedDuration != null) ...[
+                          // Custom Dynamic Price Field
+                          TextFormField(
+                            controller: _priceController,
+                            keyboardType: TextInputType.number,
+                            maxLength: 4, // Max 4 digits (up to 9999)
+                            style: const TextStyle(
+                                fontFamily: 'Tajawal', color: AppTheme.textColor),
+                            decoration: InputDecoration(
+                              labelText: 'السعر',
+                              hintText: 'مثال: 500',
+                              counterText: '', // Hide the length counter
+                              suffixIcon: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Image.asset(
+                                  'assets/icons/Saudi_Riyal_Symbol.svg.png',
+                                  height: 20,
+                                  width: 20,
+                                  color: AppTheme.subtitleColor,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              flex: 1,
-                              child: CustomTextFormField(
-                                labelText: 'السعة',
-                                hintText: 'أفراد',
-                                controller: _capacityController,
-                                keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'هذا الحقل مطلوب';
+                              }
+                              return null;
+                            },
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          ),
+                          _buildSpacing(),
+
+                          // Date Range Picker
+                          CustomTextFormField(
+                            labelText: 'التاريخ (من - إلى)',
+                            hintText: 'حدد بداية ونهاية الاشتراك',
+                            controller: _dateRangeController,
+                            readOnly: true,
+                            suffixIcon: const Icon(Icons.date_range_rounded,
+                                color: AppTheme.primaryColor),
+                            onTap: () => _selectDateRange(context),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'يرجى تحديد التاريخ';
+                              }
+                              return null;
+                            },
+                          ),
+                          _buildSpacing(),
+                        ],
+
+                        // Attachments (Moved to Bottom)
+                        const Text(
+                          'صور الـ accommodation',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        InkWell(
+                          onTap: () {
+                            // TODO: Add file picker logic
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Ink(
+                            height: 80, // Slightly taller for better touch target
+                            decoration: BoxDecoration(
+                              color: AppTheme.inputFillColor,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.grey.withValues(alpha: 0.2),
                               ),
                             ),
-                          ],
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start, // RTL -> right aligned
+                                    children: [
+                                      Text(
+                                        'إرفاق صور',
+                                        style: TextStyle(
+                                          fontFamily: 'Tajawal',
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.textColor,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        'اضغط لرفع الملف (PNG, JPG)',
+                                        style: TextStyle(
+                                          fontFamily: 'Tajawal',
+                                          fontSize: 12,
+                                          color: AppTheme.subtitleColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Icon(Icons.cloud_upload_outlined,
+                                      color: AppTheme.primaryColor, size: 28),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 32),
                       ],

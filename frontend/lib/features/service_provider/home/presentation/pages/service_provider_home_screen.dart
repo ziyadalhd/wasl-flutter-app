@@ -7,7 +7,7 @@ import 'package:wasl/features/service_provider/home/presentation/widgets/service
 import 'package:wasl/features/service_provider/home/presentation/widgets/dashboard_stat_card.dart';
 import 'package:wasl/features/service_provider/home/presentation/widgets/impact_banner.dart';
 import 'package:wasl/features/wallet/presentation/screens/provider_wallet_screen.dart';
-import 'package:wasl/features/chat/presentation/screens/chat_list_screen.dart';
+import 'package:wasl/features/service_provider/chat/presentation/screens/provider_chat_list_screen.dart';
 import 'package:wasl/features/service_provider/services/presentation/pages/provider_services_screen.dart';
 
 class ServiceProviderHomeScreen extends StatefulWidget {
@@ -23,7 +23,7 @@ class _ServiceProviderHomeScreenState extends State<ServiceProviderHomeScreen> {
 
   final List<Widget> _screens = [
     const ProviderWalletScreen(),
-    const ChatListScreen(),
+    const ProviderChatListScreen(),
     const _ServiceProviderHomeBody(),
     const ProviderServicesScreen(),
     const Center(child: Text('لوحة المعلومات')), // Placeholder

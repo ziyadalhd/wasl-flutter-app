@@ -93,14 +93,16 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
                       features: ['سكن مشترك', '2 حمام', 'غرفتين'],
                     );
                   } else {
-                    return const ProviderServiceCard(
+                    return ProviderServiceCard(
                       imageUrl:
                           'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
                       title: 'توصيل جامعي سريع',
                       location: 'مكة المكرمة',
                       price: '400 ريال/شهرياً',
                       rating: 4.9,
-                      features: ['سيارة خاصة', 'مكيف', '3 مقاعد'],
+                      features: const [], // Empty features
+                      origin: 'الشرائع',
+                      destination: 'جامعة أم القرى - العابدية',
                     );
                   }
                 },

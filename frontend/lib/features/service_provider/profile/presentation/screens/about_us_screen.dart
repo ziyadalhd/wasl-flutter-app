@@ -177,7 +177,7 @@ class ServiceProviderAboutUsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'من احدى شركات الوادي',
+                    'من ام القرى..لكل القرى',
                     style: GoogleFonts.tajawal(
                       fontSize: 14,
                       color: Colors.grey,
