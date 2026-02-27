@@ -27,7 +27,7 @@ public class CorsConfig {
                         .toList();
 
         if (!sanitized.isEmpty()) {
-            configuration.setAllowedOrigins(sanitized);
+            configuration.setAllowedOriginPatterns(sanitized);
         }
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
