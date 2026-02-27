@@ -18,14 +18,12 @@ import com.example.Wasl.dto.ProfileDTO;
 import com.example.Wasl.dto.ProviderDocumentDTO;
 import com.example.Wasl.dto.ProviderProfileDTO;
 import com.example.Wasl.dto.StudentProfileDTO;
-import com.example.Wasl.dto.SwitchModeRequest;
 import com.example.Wasl.dto.UpdateProfileRequest;
 import com.example.Wasl.dto.UserDTO;
 import com.example.Wasl.entity.Role;
 import com.example.Wasl.entity.User;
 import com.example.Wasl.entity.enums.UserMode;
 import com.example.Wasl.service.ProfileService;
-import com.example.Wasl.service.UserModeService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +34,6 @@ import lombok.RequiredArgsConstructor;
 public class MeController {
 
         private final ProfileService profileService;
-        private final UserModeService userModeService;
 
         @GetMapping
         public ResponseEntity<MeResponse> getMe(@AuthenticationPrincipal UserDetails principal) {
@@ -60,15 +57,6 @@ public class MeController {
                 updatedUser = profileService.getProfile(userId, mode);
 
                 return ResponseEntity.ok(buildMeResponse(updatedUser, mode));
-        }
-
-        @PutMapping("/mode")
-        public ResponseEntity<String> switchMode(
-                        @AuthenticationPrincipal UserDetails principal,
-                        @Valid @RequestBody SwitchModeRequest request) {
-                UUID userId = UUID.fromString(principal.getUsername());
-                userModeService.switchMode(userId, request.getMode());
-                return ResponseEntity.ok("Mode switched to " + request.getMode().name());
         }
 
         @DeleteMapping

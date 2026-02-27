@@ -1,7 +1,7 @@
 package com.example.Wasl.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,20 +24,18 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        String token = authService.register(
+        AuthResponse response = authService.register(
                 request.getEmail(),
                 request.getPhone(),
                 request.getPassword(),
                 request.getFullName(),
-                request.getMode(),
-                request.getRolesWanted());
-        return ResponseEntity.ok(AuthResponse.builder().token(token).build());
+                request.getMode());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        String token = authService.login(request.getEmail(), request.getPassword());
-        return ResponseEntity.ok(AuthResponse.builder().token(token).build());
+        AuthResponse response = authService.login(request.getEmail(), request.getPassword());
+        return ResponseEntity.ok(response);
     }
-
 }

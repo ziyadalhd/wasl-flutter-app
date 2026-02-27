@@ -2,7 +2,6 @@ package com.example.Wasl.dto;
 
 import java.util.UUID;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -11,9 +10,7 @@ public class BookingRequest {
     @NotNull(message = "Provider ID is required")
     private UUID providerId;
 
-    @NotNull(message = "Entity ID is required")
-    private UUID entityId;
+    private UUID apartmentListingId;
 
-    @NotBlank(message = "Entity Type is required")
-    private String entityType;
+    private UUID transportSubscriptionId;
 }

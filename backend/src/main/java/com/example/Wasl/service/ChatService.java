@@ -1,6 +1,6 @@
 package com.example.Wasl.service;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -120,7 +120,7 @@ public class ChatService {
         message = chatMessageRepository.save(message);
 
         // Update session's updatedAt timestamp
-        session.setUpdatedAt(LocalDateTime.now());
+        session.setUpdatedAt(OffsetDateTime.now());
         chatSessionRepository.save(session);
 
         return mapToMessageResponse(message);
@@ -137,7 +137,7 @@ public class ChatService {
         int unreadCount = chatMessageRepository.countBySessionAndSenderNotAndIsReadFalse(session, currentUser);
 
         String lastMessageText = null;
-        LocalDateTime lastMessageTime = null;
+        OffsetDateTime lastMessageTime = null;
 
         List<ChatMessage> messages = session.getMessages();
         if (messages != null && !messages.isEmpty()) {

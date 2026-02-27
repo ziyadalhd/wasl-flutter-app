@@ -1,7 +1,6 @@
 package com.example.Wasl.service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -15,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.Wasl.dto.AuthResponse;
 import com.example.Wasl.entity.ProviderProfile;
 import com.example.Wasl.entity.Role;
 import com.example.Wasl.entity.StudentProfile;
@@ -23,14 +23,16 @@ import com.example.Wasl.entity.enums.UserMode;
 import com.example.Wasl.entity.enums.UserStatus;
 import com.example.Wasl.entity.enums.VerificationStatus;
 import com.example.Wasl.exception.BusinessRuleException;
+import com.example.Wasl.repository.ProviderProfileRepository;
 import com.example.Wasl.repository.RoleRepository;
 import com.example.Wasl.repository.StudentProfileRepository;
-import com.example.Wasl.repository.ProviderProfileRepository;
 import com.example.Wasl.repository.UserRepository;
 import com.example.Wasl.security.JwtUtil;
 
 @Service
 public class AuthService implements UserDetailsService {
+
+    private static final String NORMALIZED_PHONE_REGEX = "^05\\d{8}$";
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -66,7 +68,7 @@ public class AuthService implements UserDetailsService {
                     .orElseThrow(() -> new UsernameNotFoundException("User not found: " + identifier));
         }
 
-        List<SimpleGrantedAuthority> authorities = user.getRoles().stream()
+        var authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
                 .toList();
 
@@ -77,17 +79,22 @@ public class AuthService implements UserDetailsService {
     }
 
     @Transactional
-    public String register(String email, String phone, String password, String fullName, UserMode mode,
-            List<String> rolesWanted) {
+    public AuthResponse register(String email, String phone, String password, String fullName, UserMode mode) {
+        // Normalize email
         email = email.toLowerCase().trim();
-        if (userRepository.findByEmail(email).isPresent()) {
+
+        // Normalize phone: strip whitespace, convert known formats to 05XXXXXXXX
+        phone = normalizePhone(phone);
+
+        // Duplicate pre-checks (using normalized values)
+        if (userRepository.existsByEmail(email)) {
             throw new BusinessRuleException("Email already registered");
         }
-
-        if (userRepository.findByPhone(phone).isPresent()) {
+        if (userRepository.existsByPhone(phone)) {
             throw new BusinessRuleException("Phone number already registered");
         }
 
+        // Build user
         User user = User.builder()
                 .email(email)
                 .phone(phone)
@@ -97,29 +104,35 @@ public class AuthService implements UserDetailsService {
                 .status(UserStatus.ACTIVE)
                 .build();
 
-        for (String roleName : rolesWanted) {
-            Role role = roleRepository.findById(roleName)
-                    .orElseThrow(() -> new BusinessRuleException("Role not found: " + roleName));
-            user.getRoles().add(role);
+        // Assign roles: always STUDENT, plus PROVIDER if mode is PROVIDER
+        Role studentRole = roleRepository.findById("STUDENT")
+                .orElseThrow(() -> new BusinessRuleException("Role STUDENT not found"));
+        user.getRoles().add(studentRole);
+
+        if (mode == UserMode.PROVIDER) {
+            Role providerRole = roleRepository.findById("PROVIDER")
+                    .orElseThrow(() -> new BusinessRuleException("Role PROVIDER not found"));
+            user.getRoles().add(providerRole);
         }
 
         user = userRepository.save(user);
 
-        if (mode == UserMode.STUDENT) {
-            StudentProfile profile = StudentProfile.builder().user(user).build();
-            studentProfileRepository.save(profile);
-        } else {
-            ProviderProfile profile = ProviderProfile.builder()
+        // Create profile based on mode
+        StudentProfile studentProfile = StudentProfile.builder().user(user).build();
+        studentProfileRepository.save(studentProfile);
+
+        if (mode == UserMode.PROVIDER) {
+            ProviderProfile providerProfile = ProviderProfile.builder()
                     .user(user)
                     .verificationStatus(VerificationStatus.PENDING)
                     .build();
-            providerProfileRepository.save(profile);
+            providerProfileRepository.save(providerProfile);
         }
 
-        return generateJwt(user);
+        return buildAuthResponse(user);
     }
 
-    public String login(String email, String password) {
+    public AuthResponse login(String email, String password) {
         email = email.toLowerCase().trim();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
@@ -128,7 +141,14 @@ public class AuthService implements UserDetailsService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        return generateJwt(user);
+        return buildAuthResponse(user);
+    }
+
+    private AuthResponse buildAuthResponse(User user) {
+        return AuthResponse.builder()
+                .token(generateJwt(user))
+                .selectedMode(user.getSelectedMode().name())
+                .build();
     }
 
     private String generateJwt(User user) {
@@ -139,5 +159,37 @@ public class AuthService implements UserDetailsService {
                 .toList());
 
         return jwtUtil.generateToken(user.getId().toString(), claims);
+    }
+
+    /**
+     * Normalize phone to 05XXXXXXXX format:
+     * - Remove all whitespace
+     * - +9665XXXXXXXX -> 05XXXXXXXX
+     * - 9665XXXXXXXX -> 05XXXXXXXX
+     * - 05XXXXXXXX -> as-is
+     * After normalization, enforce ^05\d{8}$ or reject.
+     */
+    static String normalizePhone(String phone) {
+        if (phone == null) {
+            throw new IllegalArgumentException("Phone number is required");
+        }
+        // Strip all whitespace
+        phone = phone.replaceAll("\\s", "");
+
+        // +9665XXXXXXXX -> 05XXXXXXXX
+        if (phone.matches("^\\+9665\\d{8}$")) {
+            phone = "0" + phone.substring(4);
+        }
+        // 9665XXXXXXXX -> 05XXXXXXXX
+        else if (phone.matches("^9665\\d{8}$")) {
+            phone = "0" + phone.substring(3);
+        }
+
+        // Final validation
+        if (!phone.matches(NORMALIZED_PHONE_REGEX)) {
+            throw new IllegalArgumentException("Phone number must be in format 05XXXXXXXX after normalization");
+        }
+
+        return phone;
     }
 }

@@ -13,9 +13,9 @@ import com.example.Wasl.entity.User;
 
 public interface ChatSessionRepository extends JpaRepository<ChatSession, UUID> {
 
-    @Query("SELECT cs FROM ChatSession cs WHERE (cs.user1 = :userA AND cs.user2 = :userB) OR (cs.user1 = :userB AND cs.user2 = :userA)")
+    @Query("SELECT cs FROM ChatSession cs JOIN FETCH cs.user1 JOIN FETCH cs.user2 WHERE (cs.user1 = :userA AND cs.user2 = :userB) OR (cs.user1 = :userB AND cs.user2 = :userA)")
     Optional<ChatSession> findChatSessionBetweenUsers(@Param("userA") User userA, @Param("userB") User userB);
 
-    @Query("SELECT cs FROM ChatSession cs WHERE cs.user1.id = :userId OR cs.user2.id = :userId ORDER BY cs.updatedAt DESC")
+    @Query("SELECT cs FROM ChatSession cs JOIN FETCH cs.user1 JOIN FETCH cs.user2 WHERE cs.user1.id = :userId OR cs.user2.id = :userId ORDER BY cs.updatedAt DESC")
     List<ChatSession> findChatSessionsByUserId(@Param("userId") UUID userId);
 }

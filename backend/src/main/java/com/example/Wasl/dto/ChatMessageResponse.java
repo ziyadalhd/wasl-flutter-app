@@ -1,6 +1,6 @@
 package com.example.Wasl.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -18,5 +18,5 @@ public class ChatMessageResponse {
     private UUID senderId;
     private String content;
     private boolean isRead;
-    private LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
 }

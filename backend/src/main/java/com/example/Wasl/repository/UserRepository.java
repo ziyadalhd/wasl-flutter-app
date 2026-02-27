@@ -25,4 +25,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     @EntityGraph(attributePaths = { "providerProfile", "providerProfile.documents" })
     @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findByIdWithProviderProfileAndDocuments(@Param("id") UUID id);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByPhone(String phone);
 }

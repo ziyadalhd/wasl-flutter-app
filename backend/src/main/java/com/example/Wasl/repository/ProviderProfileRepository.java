@@ -9,4 +9,6 @@ import com.example.Wasl.entity.ProviderProfile;
 
 @Repository
 public interface ProviderProfileRepository extends JpaRepository<ProviderProfile, UUID> {
+
+    boolean existsByUser_Id(UUID userId);
 }

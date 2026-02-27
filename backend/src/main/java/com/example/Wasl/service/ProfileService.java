@@ -15,8 +15,8 @@ import com.example.Wasl.entity.ProviderProfile;
 import com.example.Wasl.entity.StudentProfile;
 import com.example.Wasl.entity.User;
 import com.example.Wasl.entity.enums.UserMode;
-import com.example.Wasl.entity.enums.UserStatus;
 import com.example.Wasl.entity.enums.VerificationStatus;
+import com.example.Wasl.exception.BusinessRuleException;
 import com.example.Wasl.repository.CollegeRepository;
 import com.example.Wasl.repository.ProviderProfileRepository;
 import com.example.Wasl.repository.UserRepository;
@@ -30,6 +30,7 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final ProviderProfileRepository providerProfileRepository;
     private final CollegeRepository collegeRepository;
+    private final BookingService bookingService;
 
     @Transactional(readOnly = true)
     public User getProfile(UUID userId, UserMode mode) {
@@ -91,8 +92,19 @@ public class ProfileService {
     public void deleteAccount(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        user.setStatus(UserStatus.DELETED);
-        userRepository.save(user);
+
+        if (bookingService.hasActiveBookingsAsStudent(userId)) {
+            throw new BusinessRuleException(
+                    "Cannot delete account: you have active bookings as a student (PENDING or ACCEPTED).");
+        }
+
+        if (bookingService.hasActiveBookingsAsProvider(userId)) {
+            throw new BusinessRuleException(
+                    "Cannot delete account: you have active bookings as a provider (PENDING or ACCEPTED).");
+        }
+
+        // Hard delete — all dependents cascade via ON DELETE CASCADE in schema
+        userRepository.delete(user);
     }
 
     public ProfileCompletionDTO calculateCompletion(User user, UserMode mode) {

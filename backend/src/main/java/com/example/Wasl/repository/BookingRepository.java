@@ -3,15 +3,22 @@ package com.example.Wasl.repository;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.Wasl.entity.Booking;
 
 public interface BookingRepository extends JpaRepository<Booking, UUID> {
 
-    List<Booking> findByStudentIdOrderByCreatedAtDesc(UUID studentId);
+    @EntityGraph(attributePaths = { "student", "provider", "apartmentListing", "transportSubscription" })
+    Page<Booking> findByStudentIdOrderByCreatedAtDesc(UUID studentId, Pageable pageable);
 
-    List<Booking> findByProviderIdOrderByCreatedAtDesc(UUID providerId);
+    @EntityGraph(attributePaths = { "student", "provider", "apartmentListing", "transportSubscription" })
+    Page<Booking> findByProviderIdOrderByCreatedAtDesc(UUID providerId, Pageable pageable);
 
-    List<Booking> findByEntityIdAndEntityTypeOrderByCreatedAtDesc(UUID entityId, String entityType);
+    long countByStudentIdAndStatusIn(UUID studentId, List<String> statuses);
+
+    long countByProviderIdAndStatusIn(UUID providerId, List<String> statuses);
 }

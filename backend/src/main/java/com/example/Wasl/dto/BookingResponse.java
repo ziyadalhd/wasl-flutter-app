@@ -1,6 +1,6 @@
 package com.example.Wasl.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import lombok.AllArgsConstructor;
@@ -18,9 +18,9 @@ public class BookingResponse {
     private String studentName;
     private UUID providerId;
     private String providerName;
-    private UUID entityId;
-    private String entityType;
+    private UUID apartmentListingId;
+    private UUID transportSubscriptionId;
     private String status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime createdAt;
+    private OffsetDateTime updatedAt;
 }

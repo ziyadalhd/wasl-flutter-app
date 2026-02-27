@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.Wasl.entity.College;
-import com.example.Wasl.repository.CollegeRepository;
+import com.example.Wasl.dto.CollegeDTO;
+import com.example.Wasl.service.CollegeService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,10 +17,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CollegeController {
 
-    private final CollegeRepository collegeRepository;
+    private final CollegeService collegeService;
 
     @GetMapping
-    public ResponseEntity<List<College>> getAllColleges() {
-        return ResponseEntity.ok(collegeRepository.findAll());
+    public ResponseEntity<List<CollegeDTO>> getAllColleges() {
+        return ResponseEntity.ok(collegeService.getAllColleges());
     }
 }

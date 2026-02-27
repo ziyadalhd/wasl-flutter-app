@@ -3,6 +3,7 @@ package com.example.Wasl.controller;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -64,6 +65,6 @@ public class ChatController {
 
         UUID currentUserId = UUID.fromString(userDetails.getUsername());
         ChatMessageResponse response = chatService.sendMessage(currentUserId, sessionId, request.getContent());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
