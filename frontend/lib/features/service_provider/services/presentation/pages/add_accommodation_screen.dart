@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/service_provider/services/presentation/widgets/custom_text_form_field.dart';
 import 'package:wasl/features/service_provider/services/presentation/widgets/custom_dropdown_field.dart';
+import 'package:wasl/core/constants/app_constants.dart';
 
 class AddAccommodationScreen extends StatefulWidget {
   const AddAccommodationScreen({super.key});
@@ -18,9 +19,9 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
   final _locationController = TextEditingController(); // acts as mock picker
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  final _dateRangeController = TextEditingController(); // For displaying selected date
 
   // Dropdown values
+  String? _selectedCity;
   String? _selectedAccommodationType;
   int? _selectedRooms;
   int? _selectedBathrooms;
@@ -29,7 +30,8 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
 
   // Subscription state
   String? _selectedDuration;
-  DateTimeRange? _selectedDateRange;
+  DateTime? _startDate;
+  DateTime? _endDate;
 
   @override
   void dispose() {
@@ -37,7 +39,6 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
     _locationController.dispose();
     _descriptionController.dispose();
     _priceController.dispose();
-    _dateRangeController.dispose();
     super.dispose();
   }
 
@@ -53,7 +54,7 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
         );
         return;
       }
-      if (_selectedDateRange == null) {
+      if (_startDate == null || _endDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('الرجاء تحديد تاريخ الاشتراك',
@@ -66,27 +67,6 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
       
       // Form is fully valid
       _showSuccessDialog();
-    }
-  }
-
-  Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-      builder: (context, child) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDateRange = picked;
-        _dateRangeController.text =
-            '${picked.start.year}/${picked.start.month}/${picked.start.day} - ${picked.end.year}/${picked.end.month}/${picked.end.day}';
-      });
     }
   }
 
@@ -130,6 +110,157 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildRadioOption(String title, String value, String? groupValue, ValueChanged<String?> onChanged) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        unselectedWidgetColor: AppTheme.subtitleColor,
+      ),
+      child: RadioListTile<String>(
+        title: Text(title, style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.w600)),
+        value: value,
+        groupValue: groupValue,
+        activeColor: AppTheme.primaryColor,
+        contentPadding: EdgeInsets.zero,
+        dense: true,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionDetailsBlock({
+    required TextEditingController priceController,
+    required DateTime? startDate,
+    required DateTime? endDate,
+    required Function(DateTime) onStartDatePicked,
+    required Function(DateTime) onEndDatePicked,
+    EdgeInsets? padding,
+  }) {
+    return Container(
+      margin: padding ?? EdgeInsets.zero,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundColor, 
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        children: [
+          CustomTextFormField(
+            labelText: 'السعر',
+            hintText: 'أدخل السعر',
+            controller: priceController,
+            keyboardType: TextInputType.number,
+            suffixIcon: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Image.asset(
+                'assets/icons/Saudi_Riyal_Symbol.svg.png',
+                height: 20,
+                width: 20,
+                color: AppTheme.subtitleColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildDatePickerField('تاريخ البداية', startDate, onStartDatePicked),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildDatePickerField('تاريخ النهاية', endDate, onEndDatePicked),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDatePickerField(String label, DateTime? date, Function(DateTime) onPicked) {
+    return FormField<DateTime>(
+      initialValue: date,
+      validator: (val) => val == null ? 'مطلوب' : null,
+      builder: (FormFieldState<DateTime> state) {
+        final dateStr = state.value != null 
+            ? "${state.value!.year}-${state.value!.month.toString().padLeft(2, '0')}-${state.value!.day.toString().padLeft(2, '0')}" 
+            : 'اختر التاريخ';
+        final hasError = state.hasError;
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontFamily: 'Tajawal',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: state.value ?? DateTime.now(),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+                  builder: (context, child) => Directionality(textDirection: TextDirection.rtl, child: child!),
+                );
+                if (picked != null) {
+                  state.didChange(picked);
+                  onPicked(picked);
+                }
+              },
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  color: AppTheme.inputFillColor,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: hasError ? AppTheme.errorColor : Colors.transparent,
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        dateStr,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 13,
+                          color: state.value != null ? AppTheme.textColor : AppTheme.subtitleColor,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      Icons.calendar_today_outlined, 
+                      size: 18, 
+                      color: hasError ? AppTheme.errorColor : AppTheme.primaryColor
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (hasError)
+              Padding(
+                padding: const EdgeInsets.only(top: 4, right: 8),
+                child: Text(
+                  state.errorText!, 
+                  style: const TextStyle(color: AppTheme.errorColor, fontSize: 12, fontFamily: 'Tajawal')
+                ),
+              ),
+          ],
+        );
+      }
     );
   }
 
@@ -207,6 +338,44 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                           ],
                           onChanged: (val) => setState(
                               () => _selectedAccommodationType = val),
+                        ),
+                        _buildSpacing(),
+
+                        // City Dropdown
+                        DropdownButtonFormField<String>(
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          initialValue: _selectedCity,
+                          items: AppConstants.saudiCities.map((city) {
+                            return DropdownMenuItem(value: city, child: Text(city));
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCity = value;
+                            });
+                          },
+                          validator: (value) => value == null || value.isEmpty ? 'مطلوب' : null,
+                          decoration: InputDecoration(
+                            labelText: 'المدينة',
+                            hintText: 'اختر المدينة',
+                            prefixIcon: const Icon(Icons.location_city_rounded),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(
+                                color: AppTheme.primaryColor,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                          ),
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded),
                         ),
                         _buildSpacing(),
 
@@ -321,96 +490,30 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8.0,
-                          runSpacing: 8.0,
-                          children: ['شهري', 'ترم', 'سنة دراسية'].map((duration) {
-                            final isSelected = _selectedDuration == duration;
-                            return ChoiceChip(
-                              label: Text(duration),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                if (selected) {
-                                  setState(() {
-                                    _selectedDuration = duration;
-                                  });
-                                }
-                              },
-                              labelStyle: TextStyle(
-                                fontFamily: 'Tajawal',
-                                color: isSelected ? Colors.white : AppTheme.textColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              selectedColor: AppTheme.primaryColor,
-                              backgroundColor: AppTheme.inputFillColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(
-                                  color: isSelected
-                                      ? AppTheme.primaryColor
-                                      : Colors.grey.withValues(alpha: 0.2),
-                                ),
-                              ),
-                            );
-                          }).toList(),
+                        const Text(
+                          'اختر مدة واحدة فقط للاشتراك',
+                          style: TextStyle(fontFamily: 'Tajawal', fontSize: 14, color: AppTheme.subtitleColor),
                         ),
-                        _buildSpacing(),
-
-                        // Dynamic UI based on Subscription Selection
+                        const SizedBox(height: 12),
+                        _buildRadioOption('شهري', 'شهري', _selectedDuration, (val) => setState(() => _selectedDuration = val)),
+                        _buildRadioOption('ترم', 'ترم', _selectedDuration, (val) => setState(() => _selectedDuration = val)),
+                        _buildRadioOption('سنة دراسية كاملة', 'سنة دراسية كاملة', _selectedDuration, (val) => setState(() => _selectedDuration = val)),
+                        
                         if (_selectedDuration != null) ...[
-                          // Custom Dynamic Price Field
-                          TextFormField(
-                            controller: _priceController,
-                            keyboardType: TextInputType.number,
-                            maxLength: 4, // Max 4 digits (up to 9999)
-                            style: const TextStyle(
-                                fontFamily: 'Tajawal', color: AppTheme.textColor),
-                            decoration: InputDecoration(
-                              labelText: 'السعر',
-                              hintText: 'مثال: 500',
-                              counterText: '', // Hide the length counter
-                              suffixIcon: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Image.asset(
-                                  'assets/icons/Saudi_Riyal_Symbol.svg.png',
-                                  height: 20,
-                                  width: 20,
-                                  color: AppTheme.subtitleColor,
-                                ),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'هذا الحقل مطلوب';
-                              }
-                              return null;
-                            },
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                          const SizedBox(height: 16),
+                          _buildSubscriptionDetailsBlock(
+                            priceController: _priceController,
+                            startDate: _startDate,
+                            endDate: _endDate,
+                            onStartDatePicked: (date) => setState(() => _startDate = date),
+                            onEndDatePicked: (date) => setState(() => _endDate = date),
                           ),
-                          _buildSpacing(),
-
-                          // Date Range Picker
-                          CustomTextFormField(
-                            labelText: 'التاريخ (من - إلى)',
-                            hintText: 'حدد بداية ونهاية الاشتراك',
-                            controller: _dateRangeController,
-                            readOnly: true,
-                            suffixIcon: const Icon(Icons.date_range_rounded,
-                                color: AppTheme.primaryColor),
-                            onTap: () => _selectDateRange(context),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'يرجى تحديد التاريخ';
-                              }
-                              return null;
-                            },
-                          ),
-                          _buildSpacing(),
                         ],
+                        _buildSpacing(),
 
                         // Attachments (Moved to Bottom)
                         const Text(
-                          'صور الـ accommodation',
+                          'المرفقات',
                           style: TextStyle(
                             fontFamily: 'Tajawal',
                             fontSize: 16,
@@ -443,7 +546,7 @@ class _AddAccommodationScreenState extends State<AddAccommodationScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start, // RTL -> right aligned
                                     children: [
                                       Text(
-                                        'إرفاق صور',
+                                        'صور السكن',
                                         style: TextStyle(
                                           fontFamily: 'Tajawal',
                                           fontSize: 14,

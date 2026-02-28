@@ -7,8 +7,6 @@ import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/student/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:wasl/features/student/profile/presentation/screens/manage_notifications_screen.dart';
 import 'package:wasl/features/student/profile/presentation/screens/support_screen.dart';
-import 'package:wasl/features/student/profile/presentation/screens/about_us_screen.dart';
-import 'package:wasl/features/student/profile/presentation/screens/terms_conditions_screen.dart';
 
 class StudentProfileScreen extends StatefulWidget {
   const StudentProfileScreen({super.key});
@@ -20,6 +18,41 @@ class StudentProfileScreen extends StatefulWidget {
 class _StudentProfileScreenState extends State<StudentProfileScreen> {
   MeResponse? _meResponse;
   bool _isLoading = true;
+  bool isVerified = false;
+
+  final List<String> _universities = [
+    'جامعة أم القرى',
+    'جامعة الملك عبدالعزيز',
+    'جامعة الملك سعود',
+    'جامعة الملك فهد للبترول والمعادن',
+    'جامعة الملك فيصل',
+    'جامعة الملك خالد',
+    'الجامعة الإسلامية بالمدينة المنورة',
+    'جامعة الإمام محمد بن سعود الإسلامية',
+    'جامعة طيبة',
+    'جامعة القصيم',
+    'جامعة حائل',
+    'جامعة جازان',
+    'جامعة الجوف',
+    'جامعة تبوك',
+    'جامعة نجران',
+    'جامعة الباحة',
+    'جامعة الحدود الشمالية',
+    'جامعة الأمير سطام بن عبدالعزيز',
+    'جامعة شقراء',
+    'جامعة المجمعة',
+    'جامعة الطائف',
+    'جامعة بيشة',
+    'جامعة جدة',
+    'جامعة حفر الباطن',
+    'جامعة الأميرة نورة بنت عبدالرحمن',
+    'جامعة الملك سعود بن عبدالعزيز للعلوم الصحية',
+    'جامعة الملك عبدالله للعلوم والتقنية',
+    'الجامعة السعودية الإلكترونية',
+    'جامعة الأمير سلطان',
+    'جامعة دار الحكمة',
+  ];
+  List<String> _colleges = [];
 
   @override
   void initState() {
@@ -30,7 +63,19 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
   Future<void> _loadProfile() async {
     try {
       final me = await AuthService.getMe();
-      if (mounted) setState(() { _meResponse = me; _isLoading = false; });
+      List<String> loadedColleges = [];
+      try {
+        final collList = await AuthService.getColleges();
+        loadedColleges = collList.map((c) => c['name'] as String).toList();
+      } catch (_) {}
+      
+      if (mounted) {
+        setState(() { 
+        _meResponse = me; 
+        _colleges = loadedColleges;
+        _isLoading = false; 
+      });
+      }
     } catch (e) {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -58,14 +103,29 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
   }
 
   Future<void> _deleteAccount() async {
+    final passwordController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          title: const Text('حذف الحساب', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
-          content: const Text('هل أنت متأكد من حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.',
-              style: TextStyle(fontFamily: 'Tajawal')),
+          title: const Text('تأكيد حذف الحساب', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('يرجى إدخال كلمة المرور الخاصة بك لتأكيد عملية الحذف. هذا الإجراء لا يمكن التراجع عنه',
+                  style: TextStyle(fontFamily: 'Tajawal')),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'كلمة المرور',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
@@ -73,13 +133,24 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('حذف', style: TextStyle(fontFamily: 'Tajawal', color: Colors.red)),
+              child: const Text('تأكيد الحذف', style: TextStyle(fontFamily: 'Tajawal', color: Colors.red)),
             ),
           ],
         ),
       ),
     );
     if (confirmed == true) {
+      if (passwordController.text.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('يرجى إدخال كلمة المرور', style: TextStyle(fontFamily: 'Tajawal')),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
       try {
         await AuthService.deleteAccount();
         await AuthService.logout();
@@ -95,6 +166,134 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
         }
       }
     }
+  }
+
+  void _showVerificationBottomSheet() {
+    String? selectedUniversity;
+    String? selectedCollege;
+    final formKey = GlobalKey<FormState>();
+    final studentIdController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom,
+              left: 24,
+              right: 24,
+              top: 24,
+            ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Center(
+                    child: Text(
+                      'توثيق الحساب',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: AppTheme.textColor,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  // University
+                  DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      labelText: 'الجامعة',
+                      labelStyle: const TextStyle(fontFamily: 'Tajawal'),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    items: _universities.map((u) => DropdownMenuItem(value: u, child: Text(u, style: const TextStyle(fontFamily: 'Tajawal')))).toList(),
+                    onChanged: (val) => selectedUniversity = val,
+                    validator: (val) => val == null ? 'مطلوب' : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // College
+                  DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      labelText: 'الكلية',
+                      labelStyle: const TextStyle(fontFamily: 'Tajawal'),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    items: _colleges.map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(fontFamily: 'Tajawal')))).toList(),
+                    onChanged: (val) => selectedCollege = val,
+                    validator: (val) => val == null ? 'مطلوب' : null,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Student ID
+                  TextFormField(
+                    controller: studentIdController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 10,
+                    decoration: InputDecoration(
+                      labelText: 'الرقم الجامعي',
+                      labelStyle: const TextStyle(fontFamily: 'Tajawal'),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      counterText: '',
+                    ),
+                    validator: (val) {
+                      if (val == null || val.isEmpty) return 'مطلوب';
+                      return null;
+                    },
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (formKey.currentState!.validate()) {
+                          setState(() {
+                            isVerified = true;
+                          });
+                          Navigator.pop(ctx);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'توثيق',
+                        style: TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -161,14 +360,47 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Text(
-                              displayName,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Tajawal',
-                                color: AppTheme.textColor,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  displayName,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Tajawal',
+                                    color: AppTheme.textColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (isVerified)
+                                  const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                    size: 24,
+                                  )
+                                else
+                                  GestureDetector(
+                                    onTap: _showVerificationBottomSheet,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.shade50,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: Colors.orange.shade200),
+                                      ),
+                                      child: const Text(
+                                        'يحتاج توثيق',
+                                        style: TextStyle(
+                                          color: Colors.orange,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          fontFamily: 'Tajawal',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -223,26 +455,10 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                       ),
                       _buildMenuItem(
                         icon: Icons.support_agent_outlined,
-                        title: 'الدعم الفني',
+                        title: 'الدعم والمساعدة',
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => const SupportScreen()),
-                        ),
-                      ),
-                      _buildMenuItem(
-                        icon: Icons.info_outline,
-                        title: 'عن التطبيق',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const AboutUsScreen()),
-                        ),
-                      ),
-                      _buildMenuItem(
-                        icon: Icons.description_outlined,
-                        title: 'الشروط والأحكام',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const TermsConditionsScreen()),
                         ),
                       ),
 

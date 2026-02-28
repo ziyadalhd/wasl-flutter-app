@@ -5,6 +5,7 @@ import 'package:wasl/core/components/primary_button.dart';
 import 'package:wasl/core/services/api_client.dart';
 import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
+import 'package:wasl/core/constants/app_constants.dart';
 
 class ServiceProviderEditProfileScreen extends StatefulWidget {
   const ServiceProviderEditProfileScreen({super.key});
@@ -25,7 +26,6 @@ class _ServiceProviderEditProfileScreenState
   late TextEditingController _phoneController;
 
   String? _selectedCity;
-  final List<String> _cities = ['مكة المكرمة', 'جدة', 'الرياض', 'الدمام'];
 
   bool _isLoading = true;
   bool _isSaving = false;
@@ -236,11 +236,40 @@ class _ServiceProviderEditProfileScreenState
                       const SizedBox(height: 16),
 
                       // City Dropdown
-                      _buildDropdownField(
-                        label: 'المدينة',
-                        value: _selectedCity,
-                        items: _cities,
-                        onChanged: (val) => setState(() => _selectedCity = val),
+                      DropdownButtonFormField<String>(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        initialValue: _selectedCity,
+                        items: AppConstants.saudiCities.map((city) {
+                          return DropdownMenuItem(value: city, child: Text(city));
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCity = value;
+                          });
+                        },
+                        validator: (value) => value == null || value.isEmpty ? 'مطلوب' : null,
+                        decoration: InputDecoration(
+                          labelText: 'المدينة',
+                          hintText: 'اختر المدينة',
+                          prefixIcon: const Icon(Icons.location_city_rounded),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: const BorderSide(
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                        ),
+                        icon: const Icon(Icons.keyboard_arrow_down_rounded),
                       ),
 
                       const SizedBox(height: 40),

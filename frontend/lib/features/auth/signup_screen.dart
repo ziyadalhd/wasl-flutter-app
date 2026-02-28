@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:wasl/core/components/custom_text_field.dart';
 import 'package:wasl/core/components/primary_button.dart';
 import 'package:wasl/core/theme/app_theme.dart';
+import 'package:wasl/core/constants/app_constants.dart';
 
 class SignUpScreen extends StatefulWidget {
   final String? role;
@@ -22,30 +23,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _phoneController = TextEditingController();
   // City controller removed in favor of selection
 
-  final List<String> _saudiCities = [
-    'الرياض',
-    'جدة',
-    'مكة المكرمة',
-    'المدينة المنورة',
-    'الدمام',
-    'الخبر',
-    'تبوك',
-    'بريدة',
-    'عنيزة',
-    'حائل',
-    'جازان',
-    'نجران',
-    'أبها',
-    'خميس مشيط',
-    'الطائف',
-    'الجبيل',
-    'الخرج',
-    'ينبع',
-    'الهفوف',
-    'المبرز',
-    'سكاكا',
-    'عرعر',
-  ];
+  // City list removed in favor of AppConstants.saudiCities
 
   String? _selectedCity;
 
@@ -401,7 +379,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 DropdownButtonFormField<String>(
                   autovalidateMode: AutovalidateMode.onUserInteraction, // Added here
                   initialValue: _selectedCity,
-                  items: _saudiCities.map((city) {
+                  items: AppConstants.saudiCities.map((city) {
                     return DropdownMenuItem(value: city, child: Text(city));
                   }).toList(),
                   onChanged: (value) {

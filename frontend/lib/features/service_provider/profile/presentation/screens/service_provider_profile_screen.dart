@@ -7,7 +7,6 @@ import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/service_provider/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:wasl/features/service_provider/profile/presentation/screens/manage_notifications_screen.dart';
 import 'package:wasl/features/service_provider/profile/presentation/screens/support_screen.dart';
-import 'package:wasl/features/service_provider/profile/presentation/screens/about_us_screen.dart';
 
 class ServiceProviderProfileScreen extends StatefulWidget {
   const ServiceProviderProfileScreen({super.key});
@@ -59,14 +58,29 @@ class _ServiceProviderProfileScreenState
   }
 
   Future<void> _deleteAccount() async {
+    final passwordController = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
-          title: const Text('حذف الحساب', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
-          content: const Text('هل أنت متأكد من حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.',
-              style: TextStyle(fontFamily: 'Tajawal')),
+          title: const Text('تأكيد حذف الحساب', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('يرجى إدخال كلمة المرور الخاصة بك لتأكيد عملية الحذف. هذا الإجراء لا يمكن التراجع عنه',
+                  style: TextStyle(fontFamily: 'Tajawal')),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'كلمة المرور',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
@@ -74,13 +88,24 @@ class _ServiceProviderProfileScreenState
             ),
             TextButton(
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('حذف', style: TextStyle(fontFamily: 'Tajawal', color: Colors.red)),
+              child: const Text('تأكيد الحذف', style: TextStyle(fontFamily: 'Tajawal', color: Colors.red)),
             ),
           ],
         ),
       ),
     );
     if (confirmed == true) {
+      if (passwordController.text.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('يرجى إدخال كلمة المرور', style: TextStyle(fontFamily: 'Tajawal')),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
       try {
         await AuthService.deleteAccount();
         await AuthService.logout();
@@ -224,18 +249,10 @@ class _ServiceProviderProfileScreenState
                       ),
                       _buildMenuItem(
                         icon: Icons.support_agent_outlined,
-                        title: 'الدعم الفني',
+                        title: 'الدعم والمساعدة',
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => const ServiceProviderSupportScreen()),
-                        ),
-                      ),
-                      _buildMenuItem(
-                        icon: Icons.info_outline,
-                        title: 'عن التطبيق',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const ServiceProviderAboutUsScreen()),
                         ),
                       ),
 

@@ -10,22 +10,13 @@ class UserDetailsScreen extends StatefulWidget {
   State<UserDetailsScreen> createState() => _UserDetailsScreenState();
 }
 
-class _UserDetailsScreenState extends State<UserDetailsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _UserDetailsScreenState extends State<UserDetailsScreen> {
   late String _status;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _status = widget.user['status'];
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   void _showActionDialog() {
@@ -138,29 +129,24 @@ class _UserDetailsScreenState extends State<UserDetailsScreen>
             ),
           ),
           
-          // Tabs
+          const Divider(height: 1, thickness: 1),
           Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             color: Colors.white,
-            child: TabBar(
-              controller: _tabController,
-              labelColor: theme.primaryColor,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: theme.primaryColor,
-              tabs: const [
-                Tab(text: 'البيانات الأساسية'),
-                Tab(text: 'سجل النشاط'),
-              ],
+            child: Text(
+              'البيانات الأساسية',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.primaryColor,
+              ),
             ),
           ),
-          
-          // Tab Views
+          // Basic Info
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildBasicInfoTab(theme),
-                _buildActivityLogTab(theme),
-              ],
+            child: Container(
+              color: Colors.white,
+              child: _buildBasicInfoTab(theme),
             ),
           ),
         ],
@@ -223,93 +209,5 @@ class _UserDetailsScreenState extends State<UserDetailsScreen>
     );
   }
 
-  Widget _buildActivityLogTab(ThemeData theme) {
-    // Dummy Activity Log
-    final List<Map<String, dynamic>> activities = [
-      {
-        'title': 'إلغاء حجز',
-        'desc': 'المستخدم قام بإلغاء حجز مسار 201',
-        'date': 'اليوم 10:30 ص',
-        'isBad': true,
-      },
-      {
-        'title': 'دفع رسوم',
-        'desc': 'تم دفع رسوم اشتراك الشهر',
-        'date': 'أمس 08:15 م',
-        'isBad': false,
-      },
-      {
-        'title': 'إنشاء حساب',
-        'desc': 'تم إنشاء الحساب وتوثيقه',
-        'date': '12 اكتوير 2023',
-        'isBad': false,
-      },
-    ];
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: activities.length,
-      itemBuilder: (context, index) {
-        final activity = activities[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 24.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-              Column(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: activity['isBad'] ? theme.colorScheme.error : theme.primaryColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  if (index != activities.length - 1)
-                    Container(
-                      width: 2,
-                      height: 50,
-                      color: Colors.grey.shade300,
-                      margin: const EdgeInsets.only(top: 4),
-                    ),
-                ],
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      activity['title'],
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      activity['desc'],
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      activity['date'],
-                      style: TextStyle(
-                        color: Colors.grey.shade400,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }

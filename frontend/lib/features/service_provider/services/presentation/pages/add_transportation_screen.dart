@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/service_provider/services/presentation/widgets/custom_text_form_field.dart';
 import 'package:wasl/features/service_provider/services/presentation/widgets/custom_dropdown_field.dart';
+import 'package:wasl/core/constants/app_constants.dart';
 
 class AddTransportationScreen extends StatefulWidget {
   const AddTransportationScreen({super.key});
@@ -457,15 +458,40 @@ class _AddTransportationScreenState extends State<AddTransportationScreen> {
     return _buildCard(
       title: 'معلومات المسار',
       children: [
-        CustomDropdownField<String>(
-          labelText: 'المدينة',
-          hintText: 'اختر المدينة',
-          value: _selectedCity,
-          items: ['مكة المكرمة', 'جدة', 'الرياض', 'الطائف', 'المدينة المنورة'] // Mock cities
-              .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-              .toList(),
-          onChanged: (val) => setState(() => _selectedCity = val),
-          validator: (val) => val == null ? 'الرجاء اختيار المدينة' : null,
+        DropdownButtonFormField<String>(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          initialValue: _selectedCity,
+          items: AppConstants.saudiCities.map((city) {
+            return DropdownMenuItem(value: city, child: Text(city));
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedCity = value;
+            });
+          },
+          validator: (value) => value == null || value.isEmpty ? 'مطلوب' : null,
+          decoration: InputDecoration(
+            labelText: 'المدينة',
+            hintText: 'اختر المدينة',
+            prefixIcon: const Icon(Icons.location_city_rounded),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            filled: true,
+            fillColor: Colors.white,
+          ),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded),
         ),
         const SizedBox(height: 16),
         CustomTextFormField(
