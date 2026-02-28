@@ -20,6 +20,12 @@ import 'package:wasl/features/auth/delete_account_screen.dart';
 import 'package:wasl/features/wallet/presentation/screens/wallet_top_up_screen.dart';
 import 'package:wasl/features/wallet/presentation/screens/withdraw_screen.dart';
 import 'package:wasl/features/wallet/presentation/screens/withdraw_success_screen.dart';
+import 'package:wasl/features/student/services/presentation/screens/services_screen.dart';
+import 'package:wasl/features/student/services/presentation/screens/housing_details_screen.dart';
+import 'package:wasl/features/student/services/presentation/screens/transport_details_screen.dart';
+import 'package:wasl/features/student/services/presentation/screens/payment_screen.dart';
+import 'package:wasl/features/service_provider/services/presentation/widgets/provider_services_toggle.dart';
+import 'package:wasl/features/student/services/presentation/screens/study_hours_selection_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -115,6 +121,35 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/wallet/withdraw/success',
       builder: (context, state) => const WithdrawSuccessScreen(),
+    ),
+    GoRoute(
+      path: '/services',
+      builder: (context, state) {
+        final initialTabParam = state.uri.queryParameters['initialTab'];
+        final initialTab = initialTabParam == 'transportation'
+            ? ServiceTab.transportation
+            : ServiceTab.accommodation;
+        return ServicesScreen(initialTab: initialTab);
+      },
+    ),
+    GoRoute(
+      path: '/housing-details',
+      builder: (context, state) => const HousingDetailsScreen(),
+    ),
+    GoRoute(
+      path: '/transport-details',
+      builder: (context, state) {
+        final data = state.extra as Map<String, dynamic>? ?? {};
+        return TransportDetailsScreen(data: data);
+      },
+    ),
+    GoRoute(
+      path: '/study-hours',
+      builder: (context, state) => const StudyHoursSelectionScreen(),
+    ),
+    GoRoute(
+      path: '/payment',
+      builder: (context, state) => const PaymentScreen(),
     ),
   ],
 );

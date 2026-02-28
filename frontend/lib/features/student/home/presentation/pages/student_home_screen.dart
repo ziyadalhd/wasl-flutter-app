@@ -6,28 +6,47 @@ import 'package:wasl/features/student/home/presentation/widgets/listing_card.dar
 import 'package:wasl/features/student/home/presentation/widgets/promo_banner.dart';
 import 'package:wasl/features/wallet/presentation/screens/student_wallet_screen.dart';
 import 'package:wasl/features/student/chat/presentation/screens/student_chat_list_screen.dart';
+import 'package:wasl/features/student/services/presentation/screens/services_screen.dart';
+import 'package:wasl/features/service_provider/services/presentation/widgets/provider_services_toggle.dart';
+import 'package:go_router/go_router.dart';
+import 'package:wasl/features/student/bookings/presentation/screens/my_bookings_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
-  const StudentHomeScreen({super.key});
+  final int initialIndex;
+
+  const StudentHomeScreen({super.key, this.initialIndex = 2});
 
   @override
   State<StudentHomeScreen> createState() => _StudentHomeScreenState();
 }
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
-  int _selectedIndex = 2; // Default to Home
+  late int _selectedIndex;
+  ServiceTab _servicesTab = ServiceTab.accommodation;
 
-  // Screens for each tab
-  final List<Widget> _screens = [
-    const StudentWalletScreen(),
-    const StudentChatListScreen(),
-    const _StudentHomeBody(),
-    const Center(child: Text('الخدمات')), // Placeholder
-    const Center(child: Text('حجوزاتي')), // Placeholder
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Screens for each tab
+    final List<Widget> screens = [
+      const StudentWalletScreen(),
+      const StudentChatListScreen(),
+      _StudentHomeBody(
+        onNavigateToServices: (ServiceTab tab) {
+          setState(() {
+            _selectedIndex = 3;
+            _servicesTab = tab;
+          });
+        },
+      ),
+      ServicesScreen(initialTab: _servicesTab),
+      const MyBookingsScreen(), // My Bookings Screen wired up here
+    ];
     // Wrap in Directionality to enforce RTL
     return Directionality(
       textDirection: TextDirection.rtl,
@@ -41,7 +60,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         // So I should ONLY show this Scaffold's AppBar if _selectedIndex == 2.
         appBar: _selectedIndex == 2 ? const StudentAppBar() : null,
 
-        body: _screens[_selectedIndex],
+        body: screens[_selectedIndex],
 
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
@@ -110,7 +129,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 }
 
 class _StudentHomeBody extends StatelessWidget {
-  const _StudentHomeBody();
+  final void Function(ServiceTab) onNavigateToServices;
+
+  const _StudentHomeBody({required this.onNavigateToServices});
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +144,7 @@ class _StudentHomeBody extends StatelessWidget {
           SectionHeader(
             title: 'السكن',
             onViewMore: () {
-              // TODO: Navigate to Housing
+              onNavigateToServices(ServiceTab.accommodation);
             },
           ),
           SizedBox(
@@ -140,7 +161,9 @@ class _StudentHomeBody extends StatelessWidget {
                     title: 'استديو حديث ${index + 1}',
                     subtitle: '1500 ريال/شهر',
                     tagText: 'حي الجامعة',
-                    onTap: () {},
+                    onTap: () {
+                      context.push('/housing-details');
+                    },
                   ),
                 );
               }),
@@ -152,7 +175,7 @@ class _StudentHomeBody extends StatelessWidget {
           SectionHeader(
             title: 'النقل',
             onViewMore: () {
-              // TODO: Navigate to Transport
+              onNavigateToServices(ServiceTab.transportation);
             },
           ),
           SizedBox(
@@ -168,7 +191,9 @@ class _StudentHomeBody extends StatelessWidget {
                         'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
                     title: 'باص جامعي ${index + 1}',
                     subtitle: 'رحلة يومية',
-                    onTap: () {},
+                    onTap: () {
+                      context.push('/transport-details');
+                    },
                   ),
                 );
               }),
