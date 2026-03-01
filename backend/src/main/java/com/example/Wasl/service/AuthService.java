@@ -148,6 +148,11 @@ public class AuthService implements UserDetailsService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
+        // Block suspended accounts from logging in
+        if (user.getStatus() == UserStatus.SUSPENDED) {
+            throw new BusinessRuleException("هذا الحساب موقوف. تواصل مع الإدارة لمزيد من المعلومات.");
+        }
+
         // Auto-assign ADMIN role for admin email if not already present
         if ("admin@wasl.com".equals(email)) {
             boolean hasAdmin = user.getRoles().stream().anyMatch(r -> "ADMIN".equals(r.getName()));
