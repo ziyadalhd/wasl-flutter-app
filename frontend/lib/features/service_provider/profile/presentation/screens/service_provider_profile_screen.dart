@@ -44,7 +44,7 @@ class _ServiceProviderProfileScreenState
   Future<void> _switchToStudent() async {
     try {
       await AuthService.switchMode();
-      if (mounted) context.go('/student-home');
+      if (mounted) context.go('/student/home');
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -300,11 +300,11 @@ class _ServiceProviderProfileScreenState
           selectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
           onTap: (index) {
-            if (index == 0) context.go('/provider-wallet');
-            if (index == 1) context.go('/chat');
-            if (index == 2) context.go('/service-provider-home');
-            if (index == 3) context.go('/provider-services');
-            if (index == 4) context.go('/provider-dashboard');
+            if (index == 0) {} // wallet - no route yet
+            if (index == 1) {} // chat - no route yet
+            if (index == 2) context.go('/service_provider/home');
+            if (index == 3) {} // services - no route yet
+            if (index == 4) {} // dashboard - no route yet
           },
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), label: 'المحفظة'),

@@ -36,4 +36,6 @@ public class RegisterRequest {
 
     @NotNull
     private UserMode mode;
+
+    private String city;
 }

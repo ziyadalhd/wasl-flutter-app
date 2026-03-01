@@ -29,7 +29,8 @@ public class AuthController {
                 request.getPhone(),
                 request.getPassword(),
                 request.getFullName(),
-                request.getMode());
+                request.getMode(),
+                request.getCity());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

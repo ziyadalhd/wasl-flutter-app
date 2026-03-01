@@ -114,6 +114,11 @@ public class ProfileService {
         return calculateProviderCompletion(user.getProviderProfile());
     }
 
+    @Transactional
+    public void saveUser(User user) {
+        userRepository.save(user);
+    }
+
     private ProfileCompletionDTO calculateStudentCompletion(StudentProfile profile) {
         int total = 2;
         int completed = 0;

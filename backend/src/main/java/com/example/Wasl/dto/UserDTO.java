@@ -22,5 +22,6 @@ public class UserDTO {
     private String city;
     private String selectedMode;
     private String status;
+    private boolean verified;
     private List<String> roles;
 }

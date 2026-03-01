@@ -8,6 +8,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,6 +67,18 @@ public class MeController {
                 return ResponseEntity.ok("Account deleted successfully");
         }
 
+        @PatchMapping("/verify")
+        public ResponseEntity<MeResponse> verifyStudent(@AuthenticationPrincipal UserDetails principal) {
+                UUID userId = UUID.fromString(principal.getUsername());
+                User user = profileService.getProfile(userId, null);
+                user.setVerified(true);
+                profileService.saveUser(user);
+
+                UserMode mode = user.getSelectedMode();
+                user = profileService.getProfile(userId, mode);
+                return ResponseEntity.ok(buildMeResponse(user, mode));
+        }
+
         // ── Helper ──────────────────────────────────────────────────────
         private MeResponse buildMeResponse(User user, UserMode mode) {
                 UserDTO userDTO = UserDTO.builder()
@@ -76,6 +89,7 @@ public class MeController {
                                 .city(user.getCity())
                                 .selectedMode(user.getSelectedMode().name())
                                 .status(user.getStatus().name())
+                                .verified(user.isVerified())
                                 .roles(user.getRoles().stream().map(Role::getName).toList())
                                 .build();
 

@@ -5,7 +5,6 @@ import 'package:wasl/core/components/primary_button.dart';
 import 'package:wasl/core/services/api_client.dart';
 import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
-import '../admin/presentation/pages/admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -57,7 +56,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      if (me.mode == 'STUDENT') {
+      // Check if user is admin → go directly to admin dashboard
+      final isAdmin = me.user.roles.contains('ADMIN') ||
+          me.user.email.toLowerCase() == 'admin@wasl.com';
+      if (isAdmin) {
+        context.go('/admin');
+      } else if (me.mode == 'STUDENT') {
         context.go('/student/home');
       } else {
         context.go('/service_provider/home');
@@ -204,19 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 
-                const SizedBox(height: 24),
-                // Temporary Admin Button
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdminDashboardScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text('Admin (مؤقت)', style: TextStyle(color: Colors.red)),
-                ),
+
               ],
             ),
           ),

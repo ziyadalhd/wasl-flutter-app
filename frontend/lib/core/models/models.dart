@@ -18,7 +18,7 @@ class RegisterRequest {
   final String password;
   final String fullName;
   final String mode; // "STUDENT" | "PROVIDER"
-  // ❌ تم حذف rolesWanted
+  final String? city;
 
   const RegisterRequest({
     required this.email,
@@ -26,6 +26,7 @@ class RegisterRequest {
     required this.password,
     required this.fullName,
     required this.mode,
+    this.city,
   });
 
   Map<String, dynamic> toJson() => {
@@ -34,6 +35,7 @@ class RegisterRequest {
         'password': password,
         'fullName': fullName,
         'mode': mode,
+        if (city != null) 'city': city,
       };
 }
 
@@ -62,6 +64,7 @@ class UserDTO {
   final String? city;
   final String selectedMode;
   final String status;
+  final bool verified;
   final List<String> roles;
 
   const UserDTO({
@@ -72,6 +75,7 @@ class UserDTO {
     this.city,
     required this.selectedMode,
     required this.status,
+    this.verified = false,
     required this.roles,
   });
 
@@ -83,6 +87,7 @@ class UserDTO {
         city: json['city'] as String?,
         selectedMode: json['selectedMode'] as String,
         status: json['status'] as String,
+        verified: json['verified'] as bool? ?? false,
         roles: (json['roles'] as List<dynamic>).cast<String>(),
       );
 }

@@ -18,7 +18,6 @@ class StudentProfileScreen extends StatefulWidget {
 class _StudentProfileScreenState extends State<StudentProfileScreen> {
   MeResponse? _meResponse;
   bool _isLoading = true;
-  bool isVerified = false;
 
   final List<String> _universities = [
     'جامعة أم القرى',
@@ -89,7 +88,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
   Future<void> _switchToProvider() async {
     try {
       await AuthService.switchMode();
-      if (mounted) context.go('/service-provider-home');
+      if (mounted) context.go('/service_provider/home');
     } on ApiException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -261,12 +260,22 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (formKey.currentState!.validate()) {
-                          setState(() {
-                            isVerified = true;
-                          });
                           Navigator.pop(ctx);
+                          try {
+                            await AuthService.verifyStudent();
+                            _loadProfile();
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('حدث خطأ أثناء التوثيق', style: TextStyle(fontFamily: 'Tajawal')),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -373,7 +382,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                if (isVerified)
+                                if (_meResponse?.user.verified == true)
                                   const Icon(
                                     Icons.check_circle,
                                     color: Colors.green,
@@ -506,11 +515,11 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
           selectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
           onTap: (index) {
-            if (index == 0) context.go('/student-wallet');
-            if (index == 1) context.go('/chat');
-            if (index == 2) context.go('/student-home');
-            if (index == 3) context.go('/student-services');
-            if (index == 4) context.go('/student-bookings');
+            if (index == 0) {} // wallet - no route yet
+            if (index == 1) {} // chat - no route yet
+            if (index == 2) context.go('/student/home');
+            if (index == 3) context.go('/services');
+            if (index == 4) {} // bookings - no route yet
           },
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), label: 'المحفظة'),

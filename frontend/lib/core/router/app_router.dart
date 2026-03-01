@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:wasl/features/admin/presentation/pages/admin_dashboard_screen.dart';
 import 'package:wasl/features/splash/splash_screen.dart';
 import 'package:wasl/features/onboarding/onboarding_screen.dart';
 import 'package:wasl/features/auth/login_screen.dart';
@@ -57,6 +58,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/welcome',
       builder: (context, state) => const WelcomeScreen(),
+    ),
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const AdminDashboardScreen(),
     ),
     GoRoute(
       path: '/student/home',

@@ -60,19 +60,8 @@ class _PasswordScreenState extends State<PasswordScreen> {
     final fullName = data['fullName'] as String? ?? '';
     final email = data['email'] as String? ?? '';
     final phone = data['phone'] as String? ?? '';
-    final role = data['role'] as String?;
+    final city = data['city'] as String?;
     final password = _passwordController.text;
-
-    // Determine mode and roles from the selected role
-    final String mode;
-    final List<String> rolesWanted;
-    if (role != null && role.toLowerCase().contains('provider')) {
-      mode = 'PROVIDER';
-      rolesWanted = ['PROVIDER'];
-    } else {
-      mode = 'STUDENT';
-      rolesWanted = ['STUDENT'];
-    }
 
     setState(() => _isLoading = true);
 
@@ -82,11 +71,18 @@ class _PasswordScreenState extends State<PasswordScreen> {
         phone: phone.isNotEmpty ? phone : null,
         password: password,
         fullName: fullName,
-        mode: mode,
+        mode: 'STUDENT', // Default mode; role is chosen on role selection screen
+        city: city,
       );
 
       if (!mounted) return;
-      context.push('/welcome');
+
+      // Admin goes directly to admin dashboard, others go to role selection
+      if (email.toLowerCase() == 'admin@wasl.com') {
+        context.go('/admin');
+      } else {
+        context.push('/welcome');
+      }
     } on ApiException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

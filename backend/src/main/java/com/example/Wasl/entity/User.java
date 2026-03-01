@@ -56,6 +56,10 @@ public class User {
 
     private String city;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean verified = false;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "selected_mode", nullable = false, length = 50)
     private UserMode selectedMode;

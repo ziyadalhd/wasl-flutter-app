@@ -79,7 +79,8 @@ public class AuthService implements UserDetailsService {
     }
 
     @Transactional
-    public AuthResponse register(String email, String phone, String password, String fullName, UserMode mode) {
+    public AuthResponse register(String email, String phone, String password, String fullName, UserMode mode,
+            String city) {
         // Normalize email
         email = email.toLowerCase().trim();
 
@@ -100,6 +101,7 @@ public class AuthService implements UserDetailsService {
                 .phone(phone)
                 .passwordHash(passwordEncoder.encode(password))
                 .fullName(fullName)
+                .city(city)
                 .selectedMode(mode)
                 .status(UserStatus.ACTIVE)
                 .build();
@@ -113,6 +115,11 @@ public class AuthService implements UserDetailsService {
             Role providerRole = roleRepository.findById("PROVIDER")
                     .orElseThrow(() -> new BusinessRuleException("Role PROVIDER not found"));
             user.getRoles().add(providerRole);
+        }
+
+        // Auto-assign ADMIN role for admin email
+        if ("admin@wasl.com".equals(email)) {
+            roleRepository.findById("ADMIN").ifPresent(adminRole -> user.getRoles().add(adminRole));
         }
 
         user = userRepository.save(user);
@@ -139,6 +146,17 @@ public class AuthService implements UserDetailsService {
 
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new BadCredentialsException("Invalid email or password");
+        }
+
+        // Auto-assign ADMIN role for admin email if not already present
+        if ("admin@wasl.com".equals(email)) {
+            boolean hasAdmin = user.getRoles().stream().anyMatch(r -> "ADMIN".equals(r.getName()));
+            if (!hasAdmin) {
+                roleRepository.findById("ADMIN").ifPresent(adminRole -> {
+                    user.getRoles().add(adminRole);
+                    userRepository.save(user);
+                });
+            }
         }
 
         return buildAuthResponse(user);

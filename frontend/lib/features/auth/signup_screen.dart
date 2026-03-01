@@ -80,7 +80,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     bool dateValid = _selectedDate != null;
     bool genderValid = _selectedGender != null;
     
-    // ... rest of validation logic matches original structure ...
     if (!formValid || !dateValid || !genderValid) {
       String errorMessage = 'الرجاء تعبئة جميع الحقول المطلوبة.';
 
@@ -105,7 +104,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
       'email': _emailController.text.trim(),
       'phone': _phoneController.text.trim(),
-      'role': widget.role, // may be null
+      'city': _selectedCity,
     };
     context.push('/password', extra: signupData);
   }
@@ -480,4 +479,5 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+
 }

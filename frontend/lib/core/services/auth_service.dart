@@ -27,7 +27,7 @@ class AuthService {
     required String password,
     required String fullName,
     required String mode,
-    // ❌ تم حذف rolesWanted من هنا ليتوافق مع الباك إند
+    String? city,
   }) async {
     final body = RegisterRequest(
       email: email,
@@ -35,7 +35,7 @@ class AuthService {
       password: password,
       fullName: fullName,
       mode: mode,
-      // ❌ تم حذف rolesWanted من الـ Payload
+      city: city,
     ).toJson();
     final json = await ApiClient.post('/api/auth/register', body: body, auth: false);
     final authResponse = AuthResponse.fromJson(json);
@@ -74,6 +74,11 @@ class AuthService {
     
     // ✅ 3. حفظ التوكن الجديد (هذا ما كان ينقصك لتجنب الـ 403 Forbidden)
     await ApiClient.saveToken(authResponse.token);
+  }
+
+  /// `PATCH /api/me/verify` → marks the student as verified.
+  static Future<void> verifyStudent() async {
+    await ApiClient.patch('/api/me/verify');
   }
 
   /// `GET /api/colleges` → returns list of college maps.

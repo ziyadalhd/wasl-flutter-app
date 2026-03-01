@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wasl/core/services/api_client.dart';
 import '../widgets/suspend_action_dialog.dart';
 
 class UserDetailsScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class UserDetailsScreen extends StatefulWidget {
 
 class _UserDetailsScreenState extends State<UserDetailsScreen> {
   late String _status;
+  bool _isUpdating = false;
 
   @override
   void initState() {
@@ -21,6 +23,8 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
 
   void _showActionDialog() {
     final bool isActive = _status == 'نشط';
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final primaryColor = Theme.of(context).primaryColor;
     
     showDialog(
       context: context,
@@ -29,36 +33,56 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
         return SuspendActionDialog(
           isActive: isActive,
           userName: widget.user['name'],
-          onSubmit: (reason) {
-            // Simulated delay for saving status
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(Icons.check_circle, color: Colors.white),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        isActive
-                            ? 'تم إيقاف الحساب بنجاح. السبب: $reason'
-                            : 'تم إعادة تفعيل الحساب بنجاح.',
+          onSubmit: (reason) async {
+            setState(() => _isUpdating = true);
+            try {
+              final userId = widget.user['id'];
+              if (isActive) {
+                await ApiClient.patch('/api/admin/users/$userId/suspend');
+              } else {
+                await ApiClient.patch('/api/admin/users/$userId/activate');
+              }
+
+              if (!mounted) return;
+
+              setState(() {
+                _status = isActive ? 'موقوف' : 'نشط';
+                widget.user['status'] = _status;
+                _isUpdating = false;
+              });
+
+              scaffoldMessenger.showSnackBar(
+                SnackBar(
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          isActive
+                              ? 'تم إيقاف الحساب بنجاح. السبب: $reason'
+                              : 'تم إعادة تفعيل الحساب بنجاح.',
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  backgroundColor: primaryColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                backgroundColor: Theme.of(context).primaryColor,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+              );
+            } catch (e) {
+              if (!mounted) return;
+              setState(() => _isUpdating = false);
+              scaffoldMessenger.showSnackBar(
+                const SnackBar(
+                  content: Text('حدث خطأ أثناء تحديث حالة المستخدم'),
+                  backgroundColor: Colors.red,
                 ),
-              ),
-            );
-            
-            setState(() {
-              _status = isActive ? 'موقوف' : 'نشط';
-              // Update user object as well for when returning to list
-              widget.user['status'] = _status;
-            });
+              );
+            }
           },
         );
       },
@@ -90,7 +114,9 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                   radius: 40,
                   backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
                   child: Text(
-                    widget.user['name'].substring(0, 1),
+                    (widget.user['name'] ?? '?').toString().isNotEmpty
+                        ? widget.user['name'].toString().substring(0, 1)
+                        : '?',
                     style: TextStyle(
                       color: theme.primaryColor,
                       fontSize: 32,
@@ -100,12 +126,12 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  widget.user['name'],
+                  widget.user['name'] ?? '',
                   style: theme.textTheme.titleLarge,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'ID: ${widget.user['id']} | ${widget.user['role']}',
+                  '${widget.user['role'] ?? ''} | ${widget.user['email'] ?? ''}',
                   style: theme.textTheme.bodySmall,
                 ),
                 const SizedBox(height: 12),
@@ -157,14 +183,20 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
-            onPressed: _showActionDialog,
+            onPressed: _isUpdating ? null : _showActionDialog,
             style: ElevatedButton.styleFrom(
               backgroundColor: isActive ? theme.colorScheme.error : theme.primaryColor,
             ),
-            child: Text(
-              isActive ? 'إيقاف الحساب' : 'إعادة تفعيل الحساب',
-              style: const TextStyle(color: Colors.white),
-            ),
+            child: _isUpdating
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : Text(
+                    isActive ? 'إيقاف الحساب' : 'إعادة تفعيل الحساب',
+                    style: const TextStyle(color: Colors.white),
+                  ),
           ),
         ),
       ),
@@ -175,13 +207,11 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
         children: [
-        _buildInfoRow('البريد الإلكتروني', widget.user['email']),
+        _buildInfoRow('البريد الإلكتروني', widget.user['email'] ?? ''),
         const Divider(height: 32),
-        _buildInfoRow('رقم الهاتف', '+966 50 123 4567'),
+        _buildInfoRow('رقم الهاتف', widget.user['phone'] ?? '-'),
         const Divider(height: 32),
-        _buildInfoRow('تاريخ الانضمام', '12 اكتوبر 2023'),
-        const Divider(height: 32),
-        _buildInfoRow('الجامعة', 'جامعة الملك سعود'),
+        _buildInfoRow('الدور', widget.user['role'] ?? ''),
       ],
     );
   }
@@ -208,6 +238,4 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
       ],
     );
   }
-
-
 }

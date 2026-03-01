@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wasl/core/services/api_client.dart';
 import 'user_details_screen.dart';
 
 class ManageUsersScreen extends StatefulWidget {
@@ -10,7 +11,10 @@ class ManageUsersScreen extends StatefulWidget {
 
 class _ManageUsersScreenState extends State<ManageUsersScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedFilter = 'الكل'; // All, Students, Providers, Active, Suspended
+  String _selectedFilter = 'الكل';
+  List<Map<String, dynamic>> _users = [];
+  bool _isLoading = true;
+  String? _error;
 
   final List<String> _filters = [
     'الكل',
@@ -20,47 +24,40 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
     'موقوف',
   ];
 
-  // Dummy Data
-  final List<Map<String, dynamic>> _dummyUsers = [
-    {
-      'id': '1',
-      'name': 'أحمد محمد',
-      'email': 'ahmed@student.wasl.com',
-      'role': 'طالب',
-      'status': 'نشط',
-    },
-    {
-      'id': '2',
-      'name': 'سائق باص الرياض',
-      'email': 'driver1@provider.wasl.com',
-      'role': 'مقدم خدمة',
-      'status': 'نشط',
-    },
-    {
-      'id': '3',
-      'name': 'سكن الأفق',
-      'email': 'horizon@provider.wasl.com',
-      'role': 'مقدم خدمة',
-      'status': 'موقوف',
-    },
-    {
-      'id': '4',
-      'name': 'سارة خالد',
-      'email': 'sara@student.wasl.com',
-      'role': 'طالب',
-      'status': 'نشط',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    setState(() { _isLoading = true; _error = null; });
+    try {
+      final json = await ApiClient.get('/api/admin/users');
+      final List<dynamic> list = json['data'] as List<dynamic>;
+      setState(() {
+        _users = list.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading users: $e');
+      setState(() {
+        _error = 'حدث خطأ أثناء تحميل المستخدمين';
+        _isLoading = false;
+      });
+    }
+  }
 
   List<Map<String, dynamic>> _getFilteredUsers() {
-    return _dummyUsers.where((user) {
-      final matchesSearch = user['name']
-              .toLowerCase()
-              .contains(_searchController.text.toLowerCase()) ||
-          user['email']
-              .toLowerCase()
-              .contains(_searchController.text.toLowerCase()) ||
-          user['id'].contains(_searchController.text);
+    return _users.where((user) {
+      final name = (user['name'] ?? '').toString().toLowerCase();
+      final email = (user['email'] ?? '').toString().toLowerCase();
+      final id = (user['id'] ?? '').toString();
+      final search = _searchController.text.toLowerCase();
+
+      final matchesSearch = name.contains(search) ||
+          email.contains(search) ||
+          id.contains(search);
 
       bool matchesFilter = true;
       if (_selectedFilter == 'طلاب') {
@@ -86,82 +83,101 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
       appBar: AppBar(
         title: const Text('إدارة المستخدمين'),
       ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) => setState(() {}),
-              decoration: InputDecoration(
-                hintText: 'ابحث بالاسم، الإيميل، أو الـ ID...',
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-
-          // Filters
-          SizedBox(
-            height: 40,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              scrollDirection: Axis.horizontal,
-              itemCount: _filters.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final filter = _filters[index];
-                final isSelected = filter == _selectedFilter;
-                return ChoiceChip(
-                  label: Text(filter),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    setState(() {
-                      if (selected) {
-                        _selectedFilter = filter;
-                      }
-                    });
-                  },
-                  selectedColor: theme.primaryColor,
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : Colors.grey.shade700,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _error != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(_error!, style: const TextStyle(color: Colors.red)),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadUsers,
+                        child: const Text('إعادة المحاولة'),
+                      ),
+                    ],
                   ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(
-                      color: isSelected ? theme.primaryColor : Colors.grey.shade300,
+                )
+              : Column(
+                  children: [
+                    // Search Bar
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) => setState(() {}),
+                        decoration: InputDecoration(
+                          hintText: 'ابحث بالاسم، الإيميل، أو الـ ID...',
+                          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 16),
 
-          // Users List
-          Expanded(
-            child: filteredUsers.isEmpty
-                ? _buildEmptyState()
-                : ListView.separated(
-                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
-                    itemCount: filteredUsers.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final user = filteredUsers[index];
-                      return _buildUserCard(user, theme);
-                    },
-                  ),
-          ),
-        ],
-      ),
+                    // Filters
+                    SizedBox(
+                      height: 40,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _filters.length,
+                        separatorBuilder: (context, index) => const SizedBox(width: 8),
+                        itemBuilder: (context, index) {
+                          final filter = _filters[index];
+                          final isSelected = filter == _selectedFilter;
+                          return ChoiceChip(
+                            label: Text(filter),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              setState(() {
+                                if (selected) {
+                                  _selectedFilter = filter;
+                                }
+                              });
+                            },
+                            selectedColor: theme.primaryColor,
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : Colors.grey.shade700,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(
+                                color: isSelected ? theme.primaryColor : Colors.grey.shade300,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Users List
+                    Expanded(
+                      child: filteredUsers.isEmpty
+                          ? _buildEmptyState()
+                          : RefreshIndicator(
+                              onRefresh: _loadUsers,
+                              child: ListView.separated(
+                                padding: const EdgeInsets.only(left: 16, right: 16, bottom: 24),
+                                itemCount: filteredUsers.length,
+                                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                                itemBuilder: (context, index) {
+                                  final user = filteredUsers[index];
+                                  return _buildUserCard(user, theme);
+                                },
+                              ),
+                            ),
+                    ),
+                  ],
+                ),
     );
   }
 
@@ -207,24 +223,20 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
             ),
           );
           if (updatedUser != null && mounted) {
-            setState(() {
-              final index = _dummyUsers.indexWhere((u) => u['id'] == updatedUser['id']);
-              if (index != -1) {
-                _dummyUsers[index] = updatedUser;
-              }
-            });
+            _loadUsers();
           }
         },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              // Avatar
               CircleAvatar(
                 radius: 24,
                 backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
                 child: Text(
-                  user['name'].substring(0, 1),
+                  (user['name'] ?? '?').toString().isNotEmpty
+                      ? user['name'].toString().substring(0, 1)
+                      : '?',
                   style: TextStyle(
                     color: theme.primaryColor,
                     fontWeight: FontWeight.bold,
@@ -233,14 +245,12 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-
-              // Info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user['name'],
+                      user['name'] ?? '',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -248,7 +258,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      user['email'],
+                      user['email'] ?? '',
                       style: TextStyle(
                         color: Colors.grey.shade600,
                         fontSize: 13,
@@ -257,8 +267,6 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
                   ],
                 ),
               ),
-
-              // Status Badge
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
@@ -268,7 +276,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  user['status'],
+                  user['status'] ?? '',
                   style: TextStyle(
                     color: isActive ? Colors.green.shade700 : theme.colorScheme.error,
                     fontSize: 12,
