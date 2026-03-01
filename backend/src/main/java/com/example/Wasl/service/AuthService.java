@@ -122,21 +122,21 @@ public class AuthService implements UserDetailsService {
             roleRepository.findById("ADMIN").ifPresent(adminRole -> user.getRoles().add(adminRole));
         }
 
-        user = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         // Create profile based on mode
-        StudentProfile studentProfile = StudentProfile.builder().user(user).build();
+        StudentProfile studentProfile = StudentProfile.builder().user(savedUser).build();
         studentProfileRepository.save(studentProfile);
 
         if (mode == UserMode.PROVIDER) {
             ProviderProfile providerProfile = ProviderProfile.builder()
-                    .user(user)
+                    .user(savedUser)
                     .verificationStatus(VerificationStatus.PENDING)
                     .build();
             providerProfileRepository.save(providerProfile);
         }
 
-        return buildAuthResponse(user);
+        return buildAuthResponse(savedUser);
     }
 
     public AuthResponse login(String email, String password) {
