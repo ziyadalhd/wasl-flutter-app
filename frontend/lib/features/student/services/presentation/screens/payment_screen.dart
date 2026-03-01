@@ -4,7 +4,9 @@ import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/core/components/primary_button.dart';
 
 class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({super.key});
+  final bool isHousing;
+
+  const PaymentScreen({super.key, this.isHousing = true});
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -227,43 +229,45 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.errorColor.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppTheme.errorColor.withOpacity(0.1),
+                  if (widget.isHousing) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
                       ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline_rounded,
-                          color: AppTheme.errorColor.withOpacity(0.8),
-                          size: 20,
+                      decoration: BoxDecoration(
+                        color: AppTheme.errorColor.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.errorColor.withOpacity(0.1),
                         ),
-                        const SizedBox(width: 12),
-                        const Expanded(
-                          child: Text(
-                            'اذا لم يقبل في غضون 12 ساعة سيتم القبول تلقائياً وستجد الحجز بقائمة \'حجوزاتي\'.',
-                            style: TextStyle(
-                              fontFamily: 'Tajawal',
-                              fontSize: 13,
-                              color: AppTheme.errorColor,
-                              fontWeight: FontWeight.w600,
-                              height: 1.5,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            color: AppTheme.errorColor.withOpacity(0.8),
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'اذا لم يقبل في غضون 12 ساعة سيتم القبول تلقائياً وستجد الحجز بقائمة \'حجوزاتي\'.',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 13,
+                                color: AppTheme.errorColor,
+                                fontWeight: FontWeight.w600,
+                                height: 1.5,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
+                    const SizedBox(height: 32),
+                  ],
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(

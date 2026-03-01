@@ -4,7 +4,9 @@ import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/core/components/primary_button.dart';
 
 class HousingDetailsScreen extends StatelessWidget {
-  const HousingDetailsScreen({super.key});
+  final bool isFromBookings;
+
+  const HousingDetailsScreen({super.key, this.isFromBookings = false});
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +27,19 @@ class HousingDetailsScreen extends StatelessWidget {
           ),
         ),
         extendBodyBehindAppBar: true,
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: PrimaryButton(
-              text: 'الحجز',
-              onPressed: () {
-                context.push('/payment');
-              },
-            ),
-          ),
-        ),
+        bottomNavigationBar: isFromBookings
+            ? null
+            : SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: PrimaryButton(
+                    text: 'الحجز',
+                    onPressed: () {
+                      context.push('/payment', extra: true);
+                    },
+                  ),
+                ),
+              ),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -131,7 +131,7 @@ class _StudyHoursSelectionScreenState extends State<StudyHoursSelectionScreen> {
               text: 'متابعة للدفع',
               onPressed: _isValid()
                   ? () {
-                      context.push('/payment');
+                      context.push('/payment', extra: false);
                     }
                   : null,
             ),

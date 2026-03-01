@@ -146,9 +146,15 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                             rating: booking['rating'] as double?,
                             onTap: () {
                               if (booking['serviceType'] == 'سكن') {
-                                context.push('/housing-details');
+                                context.push('/housing-details', extra: true);
                               } else {
-                                context.push('/transport-details');
+                                context.push(
+                                  '/transport-details',
+                                  extra: {
+                                    'isFromBookings': true,
+                                    'data': booking,
+                                  },
+                                );
                               }
                             },
                           ),

@@ -5,8 +5,13 @@ import 'package:wasl/core/components/primary_button.dart';
 
 class TransportDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> data;
+  final bool isFromBookings;
 
-  const TransportDetailsScreen({super.key, required this.data});
+  const TransportDetailsScreen({
+    super.key,
+    required this.data,
+    this.isFromBookings = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,22 +32,24 @@ class TransportDetailsScreen extends StatelessWidget {
           ),
         ),
         extendBodyBehindAppBar: true,
-        bottomNavigationBar: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: PrimaryButton(
-              text: 'الحجز',
-              onPressed: () {
-                final isPrivateCar = data['title'] == 'سيارة خاصة';
-                if (isPrivateCar) {
-                  context.push('/study-hours');
-                } else {
-                  context.push('/payment');
-                }
-              },
-            ),
-          ),
-        ),
+        bottomNavigationBar: isFromBookings
+            ? null
+            : SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: PrimaryButton(
+                    text: 'الحجز',
+                    onPressed: () {
+                      final isPrivateCar = data['title'] == 'سيارة خاصة';
+                      if (isPrivateCar) {
+                        context.push('/study-hours');
+                      } else {
+                        context.push('/payment', extra: false);
+                      }
+                    },
+                  ),
+                ),
+              ),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

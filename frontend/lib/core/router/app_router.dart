@@ -139,13 +139,30 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/housing-details',
-      builder: (context, state) => const HousingDetailsScreen(),
+      builder: (context, state) {
+        final isFromBookings = state.extra as bool? ?? false;
+        return HousingDetailsScreen(isFromBookings: isFromBookings);
+      },
     ),
     GoRoute(
       path: '/transport-details',
       builder: (context, state) {
-        final data = state.extra as Map<String, dynamic>? ?? {};
-        return TransportDetailsScreen(data: data);
+        final extra = state.extra;
+        Map<String, dynamic> data = {};
+        bool isFromBookings = false;
+
+        if (extra is Map<String, dynamic>) {
+          if (extra.containsKey('isFromBookings')) {
+            isFromBookings = extra['isFromBookings'] as bool;
+            data = extra['data'] as Map<String, dynamic>? ?? {};
+          } else {
+            data = extra;
+          }
+        }
+        return TransportDetailsScreen(
+          data: data,
+          isFromBookings: isFromBookings,
+        );
       },
     ),
     GoRoute(
@@ -154,7 +171,10 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/payment',
-      builder: (context, state) => const PaymentScreen(),
+      builder: (context, state) {
+        final isHousing = state.extra as bool? ?? true;
+        return PaymentScreen(isHousing: isHousing);
+      },
     ),
   ],
 );
