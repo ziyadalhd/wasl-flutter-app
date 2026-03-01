@@ -1,13 +1,20 @@
 package com.example.Wasl.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.example.Wasl.entity.enums.ListingStatus;
+import com.example.Wasl.entity.enums.SubscriptionDuration;
+import com.example.Wasl.entity.enums.VehicleType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -42,6 +49,44 @@ public class TransportSubscription {
 
     @Column(precision = 10, scale = 2)
     private BigDecimal price;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vehicle_type", length = 20)
+    private VehicleType vehicleType;
+
+    @Column(name = "vehicle_model")
+    private String vehicleModel;
+
+    @Column(name = "vehicle_year")
+    private Integer vehicleYear;
+
+    @Column(name = "plate_number", length = 50)
+    private String plateNumber;
+
+    private Integer seats;
+
+    private String city;
+
+    @Column(name = "departure_location", length = 500)
+    private String departureLocation;
+
+    @Column(name = "university_location", length = 500)
+    private String universityLocation;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "subscription_duration", length = 50)
+    private SubscriptionDuration subscriptionDuration;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 50)
+    private ListingStatus status = ListingStatus.PENDING_REVIEW;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

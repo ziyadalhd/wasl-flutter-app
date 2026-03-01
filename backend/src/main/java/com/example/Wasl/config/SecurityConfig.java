@@ -44,6 +44,7 @@ public class SecurityConfig {
                         // Public Endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/colleges").permitAll()
+                        .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/error").permitAll() // <--- ADDED THIS LINE TO FIX SWAGGER 401
 

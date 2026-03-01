@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,14 +15,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.Wasl.dto.ApartmentListingDTO;
+import com.example.Wasl.dto.TransportSubscriptionDTO;
 import com.example.Wasl.entity.Role;
 import com.example.Wasl.entity.User;
+import com.example.Wasl.entity.enums.ListingStatus;
 import com.example.Wasl.entity.enums.UserStatus;
 import com.example.Wasl.repository.UserRepository;
 import com.example.Wasl.service.ProfileService;
+import com.example.Wasl.service.ServiceListingService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,6 +39,7 @@ public class AdminController {
 
     private final ProfileService profileService;
     private final UserRepository userRepository;
+    private final ServiceListingService serviceListingService;
 
     @PostMapping("/providers/{id}/verify")
     public ResponseEntity<String> verifyProvider(@PathVariable UUID id) {
@@ -89,5 +97,43 @@ public class AdminController {
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
         return ResponseEntity.ok("User activated successfully");
+    }
+
+    // ── Service Listing Approval ────────────────────────────────────
+
+    @GetMapping("/services/pending/apartments")
+    public ResponseEntity<Page<ApartmentListingDTO>> getPendingApartments(Pageable pageable) {
+        return ResponseEntity.ok(serviceListingService.getPendingApartmentListings(pageable));
+    }
+
+    @GetMapping("/services/pending/transport")
+    public ResponseEntity<Page<TransportSubscriptionDTO>> getPendingTransport(Pageable pageable) {
+        return ResponseEntity.ok(serviceListingService.getPendingTransportSubscriptions(pageable));
+    }
+
+    @PutMapping("/services/apartments/{id}/approve")
+    public ResponseEntity<ApartmentListingDTO> approveApartment(@PathVariable UUID id) {
+        ApartmentListingDTO dto = serviceListingService.updateApartmentListingStatus(id, ListingStatus.ACTIVE);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/services/apartments/{id}/reject")
+    public ResponseEntity<ApartmentListingDTO> rejectApartment(@PathVariable UUID id) {
+        ApartmentListingDTO dto = serviceListingService.updateApartmentListingStatus(id, ListingStatus.REJECTED);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/services/transport/{id}/approve")
+    public ResponseEntity<TransportSubscriptionDTO> approveTransport(@PathVariable UUID id) {
+        TransportSubscriptionDTO dto = serviceListingService.updateTransportSubscriptionStatus(id,
+                ListingStatus.ACTIVE);
+        return ResponseEntity.ok(dto);
+    }
+
+    @PutMapping("/services/transport/{id}/reject")
+    public ResponseEntity<TransportSubscriptionDTO> rejectTransport(@PathVariable UUID id) {
+        TransportSubscriptionDTO dto = serviceListingService.updateTransportSubscriptionStatus(id,
+                ListingStatus.REJECTED);
+        return ResponseEntity.ok(dto);
     }
 }
