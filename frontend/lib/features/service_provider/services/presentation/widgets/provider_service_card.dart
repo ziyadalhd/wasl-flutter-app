@@ -10,6 +10,7 @@ class ProviderServiceCard extends StatelessWidget {
   final List<String> features;
   final String? origin; // Added for route
   final String? destination; // Added for route
+  final VoidCallback? onTap;
 
   const ProviderServiceCard({
     super.key,
@@ -21,12 +22,16 @@ class ProviderServiceCard extends StatelessWidget {
     required this.features,
     this.origin,
     this.destination,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -243,6 +248,7 @@ class ProviderServiceCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

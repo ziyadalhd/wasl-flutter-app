@@ -4,6 +4,7 @@ import 'package:wasl/core/models/models.dart';
 import 'package:wasl/core/services/api_client.dart';
 import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
+import 'package:wasl/features/service_provider/home/presentation/pages/service_provider_home_screen.dart';
 import 'package:wasl/features/service_provider/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:wasl/features/service_provider/profile/presentation/screens/manage_notifications_screen.dart';
 import 'package:wasl/features/service_provider/profile/presentation/screens/support_screen.dart';
@@ -300,11 +301,13 @@ class _ServiceProviderProfileScreenState
           selectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
           onTap: (index) {
-            if (index == 0) {} // wallet - no route yet
-            if (index == 1) {} // chat - no route yet
-            if (index == 2) context.go('/service_provider/home');
-            if (index == 3) {} // services - no route yet
-            if (index == 4) {} // dashboard - no route yet
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ServiceProviderHomeScreen(initialIndex: index),
+              ),
+              (route) => false,
+            );
           },
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), label: 'المحفظة'),

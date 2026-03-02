@@ -5,6 +5,7 @@ import 'package:wasl/features/service_provider/services/presentation/widgets/pro
 import 'package:wasl/features/service_provider/services/presentation/widgets/provider_service_card.dart';
 import 'package:wasl/features/service_provider/services/presentation/pages/add_accommodation_screen.dart';
 import 'package:wasl/features/service_provider/services/presentation/pages/add_transportation_screen.dart';
+import 'package:wasl/features/service_provider/services/presentation/screens/provider_service_details_screen.dart';
 
 class ProviderServicesScreen extends StatefulWidget {
   final ServiceTab initialTab;
@@ -104,14 +105,29 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
                 itemBuilder: (context, index) {
                   // Display mock data based on the selected tab
                   if (_activeTab == ServiceTab.accommodation) {
-                    return const ProviderServiceCard(
+                    return ProviderServiceCard(
                       imageUrl:
                           'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
                       title: 'سكن النخبة',
                       location: 'حي العوالي',
                       price: '7500 ريال/الترم',
                       rating: 4.8,
-                      features: ['سكن مشترك', '2 حمام', 'غرفتين'],
+                      features: const ['سكن مشترك', '2 حمام', 'غرفتين'],
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProviderServiceDetailsScreen(
+                              heroTag: 'accommodation_img',
+                              title: 'سكن النخبة',
+                              imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+                              location: 'حي العوالي، مكة المكرمة',
+                              price: '7500 ريال/الترم',
+                              serviceType: 'accommodation',
+                            ),
+                          ),
+                        );
+                      },
                     );
                   } else {
                     return ProviderServiceCard(
@@ -124,6 +140,21 @@ class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
                       features: const [], // Empty features
                       origin: 'الشرائع',
                       destination: 'جامعة أم القرى - العابدية',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProviderServiceDetailsScreen(
+                              heroTag: 'transport_img',
+                              title: 'توصيل جامعي سريع',
+                              imageUrl: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60',
+                              location: 'مكة المكرمة',
+                              price: '400 ريال/شهرياً',
+                              serviceType: 'transportation',
+                            ),
+                          ),
+                        );
+                      },
                     );
                   }
                 },

@@ -12,7 +12,9 @@ import 'package:wasl/features/service_provider/services/presentation/widgets/pro
 import 'package:wasl/features/service_provider/services/presentation/pages/provider_services_screen.dart';
 
 class ServiceProviderHomeScreen extends StatefulWidget {
-  const ServiceProviderHomeScreen({super.key});
+  final int initialIndex;
+
+  const ServiceProviderHomeScreen({super.key, this.initialIndex = 2});
 
   @override
   State<ServiceProviderHomeScreen> createState() =>
@@ -20,8 +22,14 @@ class ServiceProviderHomeScreen extends StatefulWidget {
 }
 
 class _ServiceProviderHomeScreenState extends State<ServiceProviderHomeScreen> {
-  int _selectedIndex = 2; // Default to Home (Middle index in 5 items)
+  late int _selectedIndex;
   ServiceTab _servicesTab = ServiceTab.accommodation;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   Widget _buildScreen(int index) {
     switch (index) {

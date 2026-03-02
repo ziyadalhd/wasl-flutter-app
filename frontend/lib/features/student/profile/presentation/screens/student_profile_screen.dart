@@ -4,6 +4,7 @@ import 'package:wasl/core/models/models.dart';
 import 'package:wasl/core/services/api_client.dart';
 import 'package:wasl/core/services/auth_service.dart';
 import 'package:wasl/core/theme/app_theme.dart';
+import 'package:wasl/features/student/home/presentation/pages/student_home_screen.dart';
 import 'package:wasl/features/student/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:wasl/features/student/profile/presentation/screens/manage_notifications_screen.dart';
 import 'package:wasl/features/student/profile/presentation/screens/support_screen.dart';
@@ -399,7 +400,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                                         border: Border.all(color: Colors.orange.shade200),
                                       ),
                                       child: const Text(
-                                        'يحتاج توثيق',
+                                        'بحاجة للتوثيق',
                                         style: TextStyle(
                                           color: Colors.orange,
                                           fontSize: 12,
@@ -515,11 +516,13 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
           selectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontFamily: 'Tajawal', fontSize: 12),
           onTap: (index) {
-            if (index == 0) {} // wallet - no route yet
-            if (index == 1) {} // chat - no route yet
-            if (index == 2) context.go('/student/home');
-            if (index == 3) context.go('/services');
-            if (index == 4) {} // bookings - no route yet
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => StudentHomeScreen(initialIndex: index),
+              ),
+              (route) => false,
+            );
           },
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_outlined), label: 'المحفظة'),

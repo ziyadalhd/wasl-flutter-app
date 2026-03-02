@@ -66,11 +66,17 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/student/home',
-      builder: (context, state) => const StudentHomeScreen(),
+      builder: (context, state) {
+        final initialIndex = state.extra as int? ?? 2;
+        return StudentHomeScreen(initialIndex: initialIndex);
+      },
     ),
     GoRoute(
       path: '/service_provider/home',
-      builder: (context, state) => const ServiceProviderHomeScreen(),
+      builder: (context, state) {
+        final initialIndex = state.extra as int? ?? 2;
+        return ServiceProviderHomeScreen(initialIndex: initialIndex);
+      },
     ),
     GoRoute(
       path: '/student/complete-profile',

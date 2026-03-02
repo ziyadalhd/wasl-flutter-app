@@ -210,7 +210,7 @@ class _StudyHoursSelectionScreenState extends State<StudyHoursSelectionScreen> {
               ),
               Switch(
                 value: day.isSelected,
-                activeColor: AppTheme.primaryColor,
+                activeThumbColor: AppTheme.primaryColor,
                 onChanged: (val) {
                   setState(() {
                     day.isSelected = val;
