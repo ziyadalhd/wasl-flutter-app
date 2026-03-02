@@ -8,6 +8,7 @@ import 'package:wasl/features/service_provider/home/presentation/widgets/dashboa
 import 'package:wasl/features/service_provider/home/presentation/widgets/impact_banner.dart';
 import 'package:wasl/features/wallet/presentation/screens/provider_wallet_screen.dart';
 import 'package:wasl/features/service_provider/chat/presentation/screens/provider_chat_list_screen.dart';
+import 'package:wasl/features/service_provider/services/presentation/widgets/provider_services_toggle.dart';
 import 'package:wasl/features/service_provider/services/presentation/pages/provider_services_screen.dart';
 
 class ServiceProviderHomeScreen extends StatefulWidget {
@@ -20,14 +21,31 @@ class ServiceProviderHomeScreen extends StatefulWidget {
 
 class _ServiceProviderHomeScreenState extends State<ServiceProviderHomeScreen> {
   int _selectedIndex = 2; // Default to Home (Middle index in 5 items)
+  ServiceTab _servicesTab = ServiceTab.accommodation;
 
-  final List<Widget> _screens = [
-    const ProviderWalletScreen(),
-    const ProviderChatListScreen(),
-    const _ServiceProviderHomeBody(),
-    const ProviderServicesScreen(),
-    const Center(child: Text('لوحة المعلومات')), // Placeholder
-  ];
+  Widget _buildScreen(int index) {
+    switch (index) {
+      case 0:
+        return const ProviderWalletScreen();
+      case 1:
+        return const ProviderChatListScreen();
+      case 2:
+        return _ServiceProviderHomeBody(
+          onAddService: () {
+            setState(() {
+              _selectedIndex = 3; // Switch to Services tab
+              _servicesTab = ServiceTab.transportation; // Select 'Transport' tab
+            });
+          },
+        );
+      case 3:
+        return ProviderServicesScreen(initialTab: _servicesTab);
+      case 4:
+        return const Center(child: Text('لوحة المعلومات')); // Placeholder
+      default:
+        return const SizedBox.shrink();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +54,7 @@ class _ServiceProviderHomeScreenState extends State<ServiceProviderHomeScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: _selectedIndex == 2 ? const ServiceProviderAppBar() : null,
-        body: _screens[_selectedIndex],
+        body: _buildScreen(_selectedIndex),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             boxShadow: [
@@ -105,7 +123,11 @@ class _ServiceProviderHomeScreenState extends State<ServiceProviderHomeScreen> {
 }
 
 class _ServiceProviderHomeBody extends StatelessWidget {
-  const _ServiceProviderHomeBody();
+  final VoidCallback onAddService;
+
+  const _ServiceProviderHomeBody({
+    required this.onAddService,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +157,7 @@ class _ServiceProviderHomeBody extends StatelessWidget {
                 ),
                 ServiceProviderAddCard(
                   label: 'إضافة خدمة',
-                  onTap: () {
-                    // TODO: Handle Add Service
-                  },
+                  onTap: onAddService,
                 ),
                 const SizedBox(width: 20),
               ],

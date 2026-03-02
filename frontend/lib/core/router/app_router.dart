@@ -21,6 +21,7 @@ import 'package:wasl/features/auth/delete_account_screen.dart';
 import 'package:wasl/features/wallet/presentation/screens/wallet_top_up_screen.dart';
 import 'package:wasl/features/wallet/presentation/screens/withdraw_screen.dart';
 import 'package:wasl/features/wallet/presentation/screens/withdraw_success_screen.dart';
+import 'package:wasl/features/wallet/presentation/screens/all_transactions_screen.dart';
 import 'package:wasl/features/student/services/presentation/screens/services_screen.dart';
 import 'package:wasl/features/student/services/presentation/screens/housing_details_screen.dart';
 import 'package:wasl/features/student/services/presentation/screens/transport_details_screen.dart';
@@ -126,6 +127,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/wallet/withdraw/success',
       builder: (context, state) => const WithdrawSuccessScreen(),
+    ),
+    GoRoute(
+      path: '/wallet/transactions',
+      builder: (context, state) => const AllTransactionsScreen(),
     ),
     GoRoute(
       path: '/services',

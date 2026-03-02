@@ -6,6 +6,7 @@ import 'package:wasl/features/wallet/presentation/widgets/wallet_balance_card.da
 import 'package:wasl/features/wallet/presentation/widgets/transaction_item.dart';
 import 'package:wasl/features/wallet/presentation/widgets/payment_card_widget.dart';
 import 'package:wasl/features/wallet/presentation/screens/add_payment_card_screen.dart';
+import 'package:wasl/features/wallet/presentation/widgets/enter_amount_bottom_sheet.dart';
 import 'package:go_router/go_router.dart';
 
 class StudentWalletScreen extends StatefulWidget {
@@ -92,7 +93,14 @@ class _StudentWalletScreenState extends State<StudentWalletScreen> {
                              child: WalletBalanceCard(
                                 balance: 330, // Example balance for student
                                 onAddMoney: () {
-                                  context.push('/wallet/topup');
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    shape: const RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                                    ),
+                                    builder: (context) => const EnterAmountBottomSheet(),
+                                  );
                                 },
                                 onWithdraw: () {
                                   context.push('/wallet/withdraw', extra: 330.0);
@@ -105,7 +113,14 @@ class _StudentWalletScreenState extends State<StudentWalletScreen> {
                          WalletBalanceCard(
                             balance: 330,
                             onAddMoney: () {
-                              context.push('/wallet/topup');
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                                ),
+                                builder: (context) => const EnterAmountBottomSheet(),
+                              );
                             },
                             onWithdraw: () {
                               context.push('/wallet/withdraw', extra: 330.0);
@@ -127,13 +142,31 @@ class _StudentWalletScreenState extends State<StudentWalletScreen> {
             ),
             
             const SizedBox(height: 30),
-            Text(
-              'آخر العمليات',
-              style: GoogleFonts.tajawal(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textColor,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'آخر العمليات',
+                  style: GoogleFonts.tajawal(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.textColor,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    context.push('/wallet/transactions');
+                  },
+                  child: Text(
+                    'عرض المزيد',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             // Replicating transactions from Provider Wallet as requested

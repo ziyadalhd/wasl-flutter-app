@@ -7,14 +7,35 @@ import 'package:wasl/features/service_provider/services/presentation/pages/add_a
 import 'package:wasl/features/service_provider/services/presentation/pages/add_transportation_screen.dart';
 
 class ProviderServicesScreen extends StatefulWidget {
-  const ProviderServicesScreen({super.key});
+  final ServiceTab initialTab;
+
+  const ProviderServicesScreen({
+    super.key,
+    this.initialTab = ServiceTab.accommodation,
+  });
 
   @override
   State<ProviderServicesScreen> createState() => _ProviderServicesScreenState();
 }
 
 class _ProviderServicesScreenState extends State<ProviderServicesScreen> {
-  ServiceTab _activeTab = ServiceTab.accommodation;
+  late ServiceTab _activeTab;
+
+  @override
+  void initState() {
+    super.initState();
+    _activeTab = widget.initialTab;
+  }
+
+  @override
+  void didUpdateWidget(ProviderServicesScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialTab != oldWidget.initialTab) {
+      setState(() {
+        _activeTab = widget.initialTab;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

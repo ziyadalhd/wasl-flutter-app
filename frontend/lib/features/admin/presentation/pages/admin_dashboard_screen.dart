@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'admin_reports_screen.dart';
 import 'manage_services_screen.dart';
 import 'admin_wallet_screen.dart';
@@ -26,6 +27,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('لوحة تحكم الإدارة'),
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.logout, color: Colors.blueAccent),
+          tooltip: 'تسجيل خروج',
+          onPressed: () {
+            // Clears the stack and navigates to Login using GoRouter
+            context.go('/login');
+          },
+        ),
+      ),
       body: _screens[_currentIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
