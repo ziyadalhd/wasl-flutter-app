@@ -19,6 +19,7 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
   final _ibanController = TextEditingController();
   
   bool _useFullBalance = false;
+  String? _selectedBank;
 
   @override
   void dispose() {
@@ -137,6 +138,46 @@ class _WithdrawScreenState extends State<WithdrawScreen> {
                     }
                     if (amount > widget.currentBalance) {
                       return 'المبلغ يتجاوز رصيد المحفظة';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 24),
+
+                // Bank Name Input
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedBank,
+                  decoration: InputDecoration(
+                    labelText: 'اسم البنك',
+                    labelStyle: GoogleFonts.tajawal(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: const Icon(Icons.account_balance),
+                  ),
+                  items: [
+                    'مصرف الراجحي',
+                    'البنك الأهلي السعودي',
+                    'بنك الرياض',
+                    'مصرف الإنماء',
+                    'بنك البلاد',
+                    'البنك الأول - ساب',
+                    'بنك الجزيرة',
+                    'البنك السعودي للاستثمار'
+                  ].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value, style: GoogleFonts.tajawal(fontSize: 14)),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedBank = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'يرجى اختيار اسم البنك';
                     }
                     return null;
                   },

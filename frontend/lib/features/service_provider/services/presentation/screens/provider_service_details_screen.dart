@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:wasl/core/theme/app_theme.dart';
 import 'package:wasl/features/service_provider/services/presentation/screens/provider_edit_service_screen.dart';
 
